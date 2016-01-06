@@ -1,57 +1,48 @@
-import request from 'request';
+import request from 'request-promise';
 import cheerio from 'cheerio';
 import path from 'path';
 import fs from 'fs';
-import _ from 'highland';
+import {Subject, Observable} from 'rx';
 
 const dlDir = path.resolve('./images');
 const baseUrl = 'http://simpledesktops.com';
 
-// Create stream for images
-const imageStream = _();
+// Create Observer for images
+const images$ = new Subject();
 
 // default httpClient
 const httpClient = request.defaults({
+	transform: body => cheerio.load(body),
 	baseUrl
 });
 
-// stream the default httpClient
-const get = _.wrapCallback(httpClient.get);
+(async function() {
+	try {
+		// get the home page
+		const $ = await httpClient.get('/');
 
-// get the home page
-get('/').errors(errorHandler).each(hostLoad);
-
-// download each image in the stream
-imageStream.errors(errorHandler).each(downloadImage);
-
-// close the stream on error
-function errorHandler(err, push) {
-	push(null, {});
-	_.log('errors', err);
-}
-
-// load the home page and find the first image
-function hostLoad(response) {
-	const $ = cheerio.load(response.body);
-	const entry = $('.desktops > .edge > .desktop > a').attr('href');
-	get(entry).each(getEntry);
-}
+		// load the home page and find the first image
+		const url = $('.desktops > .edge > .desktop > a').attr('href');
+		images$
+			.startWith(url)
+			.map(getImage)
+			.subscribe(async f => download(await f), err => console.log('err', err), () => console.log('Completed'));
+	} catch (err) {
+		console.log('errors', err);
+	}
+})();
 
 // load the image and write it to the stream
-function getEntry(response) {
-	const $ = cheerio.load(response.body);
-	const back = $('a.back').attr('href');
+async function getImage(url) {
+	const $ = await httpClient.get(url);
+	const next = $('a.back').attr('href');
 
-	imageStream.write({
-		imageUrl: $('.desktop > a').attr('href'),
-		savePath: imageName(response.request.uri.path)
-	});
+	next ? images$.onNext(next) : images$.onCompleted();
 
-	if (back) {
-		get(back).each(getEntry);
-	} else {
-		imageStream.end();
-	}
+	return {
+		url: $('.desktop > a').attr('href'),
+		path: imageName(url)
+	};
 }
 
 // standardise image names
@@ -66,25 +57,10 @@ function imageName(requestPath) {
 }
 
 // rename the image file
-function renameFile(previousValue, currentValue, index) {
-	let result;
-	let digit;
-
-	switch (index) {
-		case 0:
-			result = currentValue;
-			break;
-		case 1:
-			result = `${previousValue}-${parseMonth(currentValue)}`;
-			break;
-		case 2:
-			digit = currentValue.length === 1 ? `0${currentValue}` : currentValue;
-			result = `${previousValue}-${digit}`;
-			break;
-		default:
-			result = `${previousValue} ${currentValue.replace(' ', '-')}`;
-			break;
-	}
+function renameFile(previous, current, index) {
+	const digit = current.length === 1 ? `0${current}` : current;
+	const part = [current, `${previous}-${parseMonth(current)}`, `${previous}-${digit}`];
+	const result = part[index] || `${previous} ${current.replace(' ', '-')}`;
 
 	function parseMonth(month) {
 		const months = ['pad', 'jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec'];
@@ -95,15 +71,13 @@ function renameFile(previousValue, currentValue, index) {
 	return decodeURIComponent(result);
 }
 
-// download the image to the file system
-function downloadImage(result) {
-	const saveImage = _.curry((result, err) => {
+// save the image to the file system
+function download({url, path}) {
+	fs.open(path, 'rs', err => {
 		if (err) {
-			httpClient.get(result.imageUrl).pipe(fs.createWriteStream(result.savePath));
+			httpClient.get(url).pipe(fs.createWriteStream(path));
 		} else {
-			_.log('file exists', result.savePath);
+			console.log('file exists', path);
 		}
 	});
-
-	fs.open(result.savePath, 'rs', saveImage(result));
 }
