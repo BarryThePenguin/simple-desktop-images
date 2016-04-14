@@ -1,2 +1,4 @@
+*.js
 images
+typings
 node_modules
