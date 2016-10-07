@@ -1,9 +1,8 @@
 {
-  "ambientDependencies": {
-    "cheerio": "registry:dt/cheerio#0.17.0+20160407085313",
-    "form-data": "registry:dt/form-data#0.0.0+20160316155526",
-    "node": "registry:dt/node#4.0.0+20160412142033",
-    "request": "registry:dt/request#0.0.0+20160316155526",
-    "request-promise": "registry:dt/request-promise#0.4.2+20160316155526"
+  "dependencies": {
+    "cheerio": "registry:npm/cheerio#0.20.0+20160422172414"
+  },
+  "globalDependencies": {
+    "node": "registry:env/node#6.0.0+20160918225031"
   }
 }
