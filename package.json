@@ -18,7 +18,7 @@
     "tslint": "^4.0.1",
     "typescript": "^2.0.3",
     "typings": "^1.4.0",
-    "xo": "^0.17.0"
+    "xo": "^0.18.0"
   },
   "dependencies": {
     "axios": "^0.15.2",
