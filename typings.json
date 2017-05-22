@@ -1,8 +1,0 @@
-{
-  "dependencies": {
-    "cheerio": "registry:npm/cheerio#0.20.0+20160422172414"
-  },
-  "globalDependencies": {
-    "node": "registry:env/node#6.0.0+20160918225031"
-  }
-}
