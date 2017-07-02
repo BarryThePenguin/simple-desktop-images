@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "axios": "^0.16.1",
-    "cheerio": "^0.22.0",
+    "cheerio": "^1.0.0-rc.2",
     "rxjs": "^5.4.0"
   },
   "babel": {
