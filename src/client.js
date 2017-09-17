@@ -2,7 +2,7 @@
 
 import {join} from 'path';
 import type {Axios, AxiosPromise, AxiosXHRConfigBase} from 'axios';
-import {Observable, Subject} from 'rxjs';
+import {Observable, Observer} from 'rxjs';
 
 function parseMonth(month: string) {
 	const months = [
@@ -24,17 +24,6 @@ function parseMonth(month: string) {
 	return result.length === 1 ? `0${result}` : result;
 }
 
-// Standardise image names
-function imageName(dlDir: string, imagePath: string) {
-	const savePath = imagePath
-		.replace('/browse/desktops/', '')
-		.split('/')
-		.reduce((p, c, i) => renameFile(p, c, i))
-		.trim();
-
-	return join(dlDir, `${savePath}.png`);
-}
-
 // Rename the image file
 function renameFile(previous: string, current: string, index: number) {
 	const digit = current.length === 1 ? `0${current}` : current;
@@ -45,6 +34,17 @@ function renameFile(previous: string, current: string, index: number) {
 	];
 	const result = part[index] || `${previous} ${current.replace(' ', '-')}`;
 	return decodeURIComponent(result);
+}
+
+// Standardise image names
+function imageName(dlDir: string, imagePath: string) {
+	const savePath = imagePath
+		.replace('/browse/desktops/', '')
+		.split('/')
+		.reduce((p, c, i) => renameFile(p, c, i))
+		.trim();
+
+	return join(dlDir, `${savePath}.png`);
 }
 
 export class FileDownload {
@@ -63,45 +63,43 @@ export class FileDownload {
 
 export class Client {
 	httpClient: Axios;
-	images$: Subject<string>;
+	images$: Observer<string>;
 	dlDir: string;
 	constructor(httpClient: Axios, dlDir: string) {
 		// Default httpClient
 		this.httpClient = httpClient;
 		this.dlDir = dlDir;
 	}
-	start(query: string): Promise<Observable<FileDownload>> {
-		// Create Observer for images
-		this.images$ = new Subject();
-
+	async start(query: string): Promise<Observable<FileDownload>> {
 		// Get the home page
-		return this.httpClient.get('/').then(response => {
-			const $ = response.data;
-			// Load the home page and find the first image
-			const url = $(query).attr('href');
-			return this.images$.startWith(url).mergeMap(nextUrl => this.nextImage(nextUrl));
-		});
+		const response = await this.httpClient.get('/');
+		const $ = response.data;
+		// Load the home page and find the first image
+		const url = $(query).attr('href');
+
+		return Observable.create(observer => {
+			this.images$ = observer;
+		}).startWith(url).mergeMap(nextUrl => this.nextImage(nextUrl));
 	}
 	download(uri: string, options?: AxiosXHRConfigBase<*>): AxiosPromise<*> {
 		return this.httpClient.get(uri, options);
 	}
 	// Load the image and write it to the stream
-	nextImage(imageUrl: string) {
-		return this.download(imageUrl).then(response => {
-			const $ = response.data;
-			const next = $('a.back').attr('href');
+	async nextImage(imageUrl: string) {
+		const response = await this.download(imageUrl);
+		const $ = response.data;
+		const next = $('a.back').attr('href');
 
-			if (next) {
-				this.images$.next(next);
-			} else {
-				this.images$.complete();
-			}
+		if (next) {
+			this.images$.next(next);
+		} else {
+			this.images$.complete();
+		}
 
-			return new FileDownload(
-				$('.desktop > a').attr('href'),
-				imageUrl,
-				this.dlDir
-			);
-		});
+		return new FileDownload(
+			$('.desktop > a').attr('href'),
+			imageUrl,
+			this.dlDir
+		);
 	}
 }

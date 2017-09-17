@@ -1,10 +1,11 @@
-// flow-typed signature: 8bc27ef0ed168765f4241cf75bfb2160
-// flow-typed version: d9c17ab8e9/rxjs_v5.0.x/flow_>=v0.34.x
+// flow-typed signature: 0723ec09e223e3f8a0a66ef5ab1fa253
+// flow-typed version: 96963f4e58/rxjs_v5.0.x/flow_>=v0.34.x
 
 // FIXME(samgoldman) Remove top-level interface once Babel supports
 // `declare interface` syntax.
 // FIXME(samgoldman) Remove this once rxjs$Subject<T> can mixin rxjs$Observer<T>
 interface rxjs$IObserver<-T> {
+  closed?: boolean,
   next(value: T): mixed;
   error(error: any): mixed;
   complete(): mixed;
@@ -159,6 +160,12 @@ declare class rxjs$Observable<+T> {
 
   elementAt(index: number, defaultValue?: T): rxjs$Observable<T>;
 
+  expand(
+    project: (value: T, index: number) => rxjs$Observable<T>,
+    concurrent?: number,
+    scheduler?: rxjs$SchedulerClass,
+  ): rxjs$Observable<T>;
+
   filter(predicate: (value: T, index: number) => boolean, thisArg?: any): rxjs$Observable<T>;
 
   finally(f: () => mixed): rxjs$Observable<T>;
@@ -263,11 +270,11 @@ declare class rxjs$Observable<+T> {
 
   sample(notifier: rxjs$Observable<any>): rxjs$Observable<T>;
 
-  sampleTime(delay: number): rxjs$Observable<T>;
+  sampleTime(delay: number, scheduler?: rxjs$SchedulerClass): rxjs$Observable<T>;
 
   publishReplay(bufferSize?: number, windowTime?: number, scheduler?: rxjs$SchedulerClass): rxjs$ConnectableObservable<T>;
 
-  retry(retryCount: number): rxjs$Observable<T>;
+  retry(retryCount: ?number): rxjs$Observable<T>;
 
   retryWhen(notifier: (errors: rxjs$Observable<Error>) => rxjs$Observable<any>): rxjs$Observable<T>;
 
@@ -684,6 +691,12 @@ declare class rxjs$Observable<+T> {
     resourceFactory: () => ?R,
     observableFactory: (resource: R) => rxjs$Observable<T> | Promise<T> | void,
   ): rxjs$Observable<T>;
+
+  _subscribe(observer: rxjs$Subscriber<T>): rxjs$Subscription;
+
+  _isScalar: boolean;
+  source: ?rxjs$Observable<any>;
+  operator: ?rxjs$Operator<any, any>;
 }
 
 declare class rxjs$ConnectableObservable<T> extends rxjs$Observable<T> {
@@ -697,6 +710,10 @@ declare class rxjs$Observer<T> {
   error(error: any): mixed;
 
   complete(): mixed;
+}
+
+declare interface rxjs$Operator<T, R> {
+  call(subscriber: rxjs$Subscriber<R>, source: any): rxjs$TeardownLogic;
 }
 
 // FIXME(samgoldman) should be `mixins rxjs$Observable<T>, rxjs$Observer<T>`
@@ -715,7 +732,16 @@ declare class rxjs$Subject<T> extends rxjs$Observable<T> {
 
   // For use in subclasses only:
   _next(value: T): void;
-  _subscribe(observer: rxjs$PartialObserver<T>): rxjs$Subscription;
+}
+
+declare class rxjs$AnonymousSubject<T> extends rxjs$Subject<T> {
+  source: ?rxjs$Observable<T>;
+  destination: ?rxjs$Observer<T>;
+
+  constructor(destination?: rxjs$IObserver<T>, source?: rxjs$Observable<T>): void;
+  next(value: T): void;
+  error(err: any): void;
+  complete(): void;
 }
 
 declare class rxjs$BehaviorSubject<T> extends rxjs$Subject<T> {
@@ -733,6 +759,24 @@ declare class rxjs$Subscription {
   add(teardown: rxjs$TeardownLogic): rxjs$Subscription;
 }
 
+declare class rxjs$Subscriber<T> extends rxjs$Subscription {
+  static create<T>(
+    next?: (x?: T) => void,
+    error?: (e?: any) => void,
+    complete?: () => void,
+  ): rxjs$Subscriber<T>;
+
+  constructor(
+    destinationOrNext?: (rxjs$PartialObserver<any> | ((value: T) => void)),
+    error?: (e?: any) => void,
+    complete?: () => void,
+  ): void;
+  next(value?: T): void;
+  error(err?: any): void;
+  complete(): void;
+  unsubscribe(): void;
+}
+
 declare class rxjs$SchedulerClass {
   schedule<T>(work: (state?: T) => void, delay?: number, state?: T): rxjs$Subscription;
 }
@@ -743,8 +787,11 @@ declare class rxjs$TimeoutError extends Error {
 declare module 'rxjs' {
   declare module.exports: {
     Observable: typeof rxjs$Observable,
+    Observer: typeof rxjs$Observer,
     ConnectableObservable: typeof rxjs$ConnectableObservable,
     Subject: typeof rxjs$Subject,
+    Subscriber: typeof rxjs$Subscriber,
+    AnonymousSubject: typeof rxjs$AnonymousSubject,
     BehaviorSubject: typeof rxjs$BehaviorSubject,
     ReplaySubject: typeof rxjs$ReplaySubject,
     Scheduler: {
@@ -784,12 +831,25 @@ declare module 'rxjs/ReplaySubject' {
 
 declare module 'rxjs/Subject' {
   declare module.exports: {
-    Subject: typeof rxjs$Subject
+    Subject: typeof rxjs$Subject,
+    AnonymousSubject: typeof rxjs$AnonymousSubject
+  }
+}
+
+declare module 'rxjs/Subscriber' {
+  declare module.exports: {
+    Subscriber: typeof rxjs$Subscriber
   }
 }
 
 declare module 'rxjs/Subscription' {
   declare module.exports: {
     Subscription: typeof rxjs$Subscription
+  }
+}
+
+declare module 'rxjs/testing/TestScheduler' {
+  declare module.exports: {
+    TestScheduler: typeof rxjs$SchedulerClass
   }
 }

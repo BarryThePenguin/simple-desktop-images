@@ -2,3 +2,6 @@ dist
 images
 typings
 node_modules
+coverage
+coverage.lcov
+.nyc_output
