@@ -1,7 +1,10 @@
+// @flow
+
 import test from 'ava';
 import axios from 'axios';
 import moxios from 'moxios';
 import {load} from 'cheerio';
+import {toArray} from 'rxjs/operators';
 import {Client, FileDownload} from '../src/client';
 
 let httpClient;
@@ -47,7 +50,7 @@ test('client constructor', async t => {
 
 	const images$ = await client.start('.selector');
 
-	return images$.toArray().forEach(data => {
+	return images$.pipe(toArray()).forEach(data => {
 		t.deepEqual(data, [
 			new FileDownload(
 				'/browse/desktops/2016/feb/02/image-two',

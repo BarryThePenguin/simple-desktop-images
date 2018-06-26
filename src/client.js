@@ -3,6 +3,7 @@
 import {join} from 'path';
 import type {Axios, AxiosPromise, AxiosXHRConfigBase} from 'axios';
 import {Observable, Observer} from 'rxjs';
+import {startWith, mergeMap} from 'rxjs/operators';
 
 function parseMonth(month: string) {
 	const months = [
@@ -49,9 +50,13 @@ function imageName(dlDir: string, imagePath: string) {
 
 export class FileDownload {
 	dlDir: string;
+
 	imagePath: string;
+
 	path: string;
+
 	url: string;
+
 	constructor(url: string, imagePath: string, dlDir: string) {
 		this.url = url;
 		this.imagePath = imagePath;
@@ -63,13 +68,17 @@ export class FileDownload {
 
 export class Client {
 	httpClient: Axios;
+
 	images$: Observer<string>;
+
 	dlDir: string;
+
 	constructor(httpClient: Axios, dlDir: string) {
 		// Default httpClient
 		this.httpClient = httpClient;
 		this.dlDir = dlDir;
 	}
+
 	async start(query: string): Promise<Observable<FileDownload>> {
 		// Get the home page
 		const response = await this.httpClient.get('/');
@@ -79,11 +88,16 @@ export class Client {
 
 		return Observable.create(observer => {
 			this.images$ = observer;
-		}).startWith(url).mergeMap(nextUrl => this.nextImage(nextUrl));
+		}).pipe(
+			startWith(url),
+			mergeMap(nextUrl => this.nextImage(nextUrl), 4)
+		);
 	}
+
 	download(uri: string, options?: AxiosXHRConfigBase<*>): AxiosPromise<*> {
 		return this.httpClient.get(uri, options);
 	}
+
 	// Load the image and write it to the stream
 	async nextImage(imageUrl: string) {
 		const response = await this.download(imageUrl);
