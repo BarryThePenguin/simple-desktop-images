@@ -6,9 +6,9 @@
     "prestart": "babel src --out-dir lib",
     "start": "node lib/index.js",
     "flow": "flow",
-    "test": "xo && flow && nyc --reporter lcov --reporter text-lcov ava",
+    "test": "xo && flow && nyc ava",
     "test:watch": "ava --watch",
-    "coverage": "nyc report --reporter=text-lcov > coverage.lcov && codecov"
+    "coverage": "nyc report > coverage.lcov && codecov"
   },
   "author": "Jonathan Haines",
   "license": "MIT",
@@ -24,7 +24,7 @@
     "ava": "^1.0.0-beta.6",
     "babel-eslint": "^8.2.5",
     "codecov": "^3.0.0",
-    "flow-bin": "^0.75.0",
+    "flow-bin": "^0.76.0",
     "moxios": "^0.4.0",
     "nyc": "^12.0.2",
     "xo": "^0.21.1"
@@ -51,6 +51,12 @@
         }
       ]
     ]
+  },
+  "nyc": {
+     "reporter": [
+       "lcov",
+       "text-lcov"
+     ]
   },
   "xo": {
     "prettier": true,
