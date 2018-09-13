@@ -1,14 +1,10 @@
 // @flow
 
-import * as fs from 'fs';
-import {promisify} from 'util';
+import {promises as fs} from 'fs';
 import {resolve} from 'path';
 import axios from 'axios';
 import {load} from 'cheerio';
 import {Client, FileDownload} from './client';
-
-const open = promisify(fs.open);
-const {createWriteStream} = fs;
 
 const baseURL = 'http://simpledesktops.com';
 // REVIEW: const dlDir = resolve('./images');
@@ -44,28 +40,34 @@ const httpClient = axios.create({
 				console.log('Completed');
 			}
 		});
-	} catch (err) {
-		console.log('app errors', err);
+	} catch (error) {
+		console.log('app errors', error);
 	}
 
 	// Save the image to the file system
 	async function download(file: FileDownload) {
 		const {url, path} = file;
+		let handler;
 
 		try {
-			await open(path, 'wx', 666);
+			handler = await fs.open(path, 'wx', 0o644);
 
 			const response = await client.download(url, {
-				responseType: 'stream'
+				responseType: 'arraybuffer'
 			});
-			response.data.pipe(createWriteStream(path));
-		} catch (err) {
-			if (err.code === 'EEXIST') {
+
+			await handler.writeFile(response.data, {encoding: 'utf-8'});
+		} catch (error) {
+			if (error.code === 'EEXIST') {
 				console.log('file exists', path);
 				return;
 			}
 
-			console.log('download error', err);
+			console.log('download error', error);
+		} finally {
+			if (handler) {
+				await handler.close();
+			}
 		}
 	}
 })(new Client(httpClient, dlDir));

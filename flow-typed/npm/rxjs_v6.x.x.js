@@ -1,5 +1,5 @@
-// flow-typed signature: 78102c9378223bdd9a7442cccf401be8
-// flow-typed version: 3836987de0/rxjs_v6.x.x/flow_>=v0.34.x
+// flow-typed signature: e9b5f9bb1f82422c649d5952904060c8
+// flow-typed version: 46f6e6132d/rxjs_v6.x.x/flow_>=v0.34.x
 
 type rxjs$PartialObserver<-T> =
   | {
@@ -1634,11 +1634,14 @@ declare class rxjs$UnsubscriptionError extends Error {}
 
 declare module "rxjs" {
   declare module.exports: {
+    concat<+T>(...sources: rxjs$Observable<T>[]): rxjs$Observable<T>,
     from<+T>(
       input: rxjs$ObservableInput<T>,
       scheduler?: rxjs$SchedulerClass
     ): rxjs$Observable<T>,
+    of<+T>(...values: T[]): rxjs$Observable<T>,
     empty<+T>(): rxjs$Observable<T>,
+    never<+T>(): rxjs$Observable<T>,
     bindNodeCallback<U>(
       callbackFunc: (callback: (err: any, result: U) => any) => any,
       selector?: void,
@@ -1719,6 +1722,45 @@ declare module "rxjs" {
       period?: number,
       scheduler?: rxjs$SchedulerClass
     ): rxjs$Observable<number>,
+    interval(
+      period?: number,
+      scheduler?: rxjs$SchedulerClass
+    ): rxjs$Observable<number>,
+    range(
+      start?: number,
+      count?: number,
+      scheduler?: rxjs$SchedulerClass
+    ): rxjs$Observable<number>,
+    merge: (<+T, U>(
+      source0: rxjs$Observable<T>,
+      source1: rxjs$Observable<U>
+    ) => rxjs$Observable<T | U>) &
+      (<+T, U, V>(
+      source0: rxjs$Observable<T>,
+      source1: rxjs$Observable<U>,
+      source2: rxjs$Observable<V>
+    ) => rxjs$Observable<T | U | V>) &
+      (<+T>(...sources: rxjs$Observable<T>[]) => rxjs$Observable<T>),
+    fromEvent: (<+T>(
+      element: any,
+      eventName: string,
+      ...none: Array<void>
+    ) => rxjs$Observable<T>) & (<+T>(
+      element: any,
+      eventName: string,
+      options: rxjs$EventListenerOptions,
+      ...none: Array<void>
+    ) => rxjs$Observable<T>) & (<+T>(
+      element: any,
+      eventName: string,
+      selector: () => T,
+      ...none: Array<void>
+    ) => rxjs$Observable<T>) & (<+T>(
+      element: any,
+      eventName: string,
+      options: rxjs$EventListenerOptions,
+      selector: () => T
+    ) => rxjs$Observable<T>);
     Observable: typeof rxjs$Observable,
     Observer: typeof rxjs$Observer,
     ConnectableObservable: typeof rxjs$ConnectableObservable,
@@ -1786,7 +1828,7 @@ declare module "rxjs/Subscription" {
   };
 }
 
-declare module "rxjs/testing/TestScheduler" {
+declare module "rxjs/testing" {
   declare module.exports: {
     TestScheduler: typeof rxjs$SchedulerClass
   };
