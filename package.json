@@ -2,46 +2,62 @@
   "name": "simple-desktop-images",
   "version": "1.0.0",
   "description": "Image scraper for simple desktops",
-  "scripts": {
-    "prestart": "babel src --out-dir lib",
-    "start": "node lib/index.js",
-    "flow": "flow",
-    "test": "xo && flow && nyc ava",
-    "test:watch": "ava --watch",
-    "coverage": "nyc report > coverage.lcov && codecov"
-  },
-  "author": "Jonathan Haines",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/barrythepenguin/simple-desktop-images.git"
   },
-  "devDependencies": {
-    "@babel/cli": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
-    "@babel/preset-flow": "^7.0.0",
-    "@babel/register": "^7.0.0",
-    "ava": "^1.0.0-beta.8",
-    "babel-eslint": "^9.0.0",
-    "codecov": "^3.1.0",
-    "flow-bin": "^0.80.0",
-    "moxios": "^0.4.0",
-    "nyc": "^13.0.1",
-    "xo": "^0.23.0"
+  "author": "Jonathan Haines",
+  "scripts": {
+    "coverage": "nyc report > coverage.lcov && codecov",
+    "prestart": "tsc",
+    "start": "node lib/index.js",
+    "test": "xo && tsc --noEmit && nyc ava",
+    "test:watch": "ava --watch",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch"
   },
   "dependencies": {
-    "axios": "^0.18.0",
-    "cheerio": "^1.0.0-rc.2",
-    "rxjs": "^6.3.2"
+    "@reactivex/rxjs": "^6.5.4",
+    "cheerio": "^1.0.0-rc.3",
+    "got": "^10.2.2",
+    "rxjs": "^6.5.4"
+  },
+  "devDependencies": {
+    "@ava/babel": "^1.0.0",
+    "@babel/cli": "^7.8.3",
+    "@babel/core": "^7.8.3",
+    "@babel/preset-env": "^7.8.3",
+    "@babel/preset-typescript": "^7.8.3",
+    "@types/axios": "^0.14.0",
+    "@types/cheerio": "^0.22.15",
+    "@types/got": "^9.6.9",
+    "@types/node": "^13.1.8",
+    "@typescript-eslint/eslint-plugin": "^2.16.0",
+    "@typescript-eslint/parser": "^2.16.0",
+    "ava": "^3.0.0",
+    "codecov": "^3.6.1",
+    "eslint-config-xo-typescript": "^0.24.1",
+    "nock": "^11.7.2",
+    "nyc": "^15.0.0",
+    "prettier-plugin-package": "^0.3.1",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.7.5",
+    "xo": "^0.25.3"
   },
   "ava": {
+    "concurrency": 4,
+    "timeout": "1m",
+    "extensions": [
+      "ts"
+    ],
     "require": [
-      "@babel/register"
+      "ts-node/register/transpile-only"
     ]
   },
   "babel": {
     "presets": [
-      "@babel/preset-flow",
+      "@babel/typescript",
       [
         "@babel/preset-env",
         {
@@ -60,12 +76,12 @@
   },
   "xo": {
     "prettier": true,
-    "parser": "babel-eslint",
+    "extends": "xo-typescript",
+    "extensions": [
+      "ts"
+    ],
     "envs": [
       "node"
-    ],
-    "ignores": [
-      "flow-typed/**"
     ]
   }
 }
