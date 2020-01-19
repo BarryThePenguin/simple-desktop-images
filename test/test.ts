@@ -29,6 +29,40 @@ test('no result', async t => {
 	});
 });
 
+test('empty body', async t => {
+	nock(prefixUrl)
+		.defaultReplyHeaders({
+			'Content-Type': 'text/html'
+		})
+		.get('/')
+		.reply(200, '');
+
+	const client = new Client(prefixUrl, dlDir);
+
+	const images$ = await client.start('.selector');
+
+	return images$.pipe(toArray()).forEach(data => {
+		t.deepEqual(data, []);
+	});
+});
+
+test('incorrect content-type', async t => {
+	nock(prefixUrl)
+		.defaultReplyHeaders({
+			'Content-Type': 'text/not-html'
+		})
+		.get('/')
+		.reply(200);
+
+	const client = new Client(prefixUrl, dlDir);
+
+	const images$ = await client.start('.selector');
+
+	return images$.pipe(toArray()).forEach(data => {
+		t.deepEqual(data, []);
+	});
+});
+
 test('client constructor', async t => {
 	nock(prefixUrl)
 		.defaultReplyHeaders({

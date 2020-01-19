@@ -42,7 +42,7 @@ function imageName(dlDir: string, imagePath: string): string {
 	const savePath = imagePath
 		.replace('/browse/desktops/', '')
 		.split('/')
-		.reduce((p, c, i) => renameFile(p, c, i))
+		.reduce(renameFile)
 		.trim();
 
 	return join(dlDir, `${savePath}.png`);
@@ -98,10 +98,14 @@ export class Client {
 
 	async start(query: string): Promise<Observable<FileDownload | undefined>> {
 		// Get the home page
-		const response = await this.httpClient.get<CheerioStatic>('');
+		const response = await this.httpClient.get<CheerioStatic | undefined>('');
 		const $ = response.body;
 		// Load the home page and find the first image
-		const url = $(query).attr('href');
+		let url;
+
+		if (typeof $ === 'function') {
+			url = $(query).attr('href');
+		}
 
 		return this.images$.pipe(
 			startWith(url),
