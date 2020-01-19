@@ -76,7 +76,9 @@
   },
   "xo": {
     "prettier": true,
-    "extends": "xo-typescript",
+    "extends": [
+      "xo-typescript"
+    ],
     "extensions": [
       "ts"
     ],
