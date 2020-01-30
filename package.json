@@ -20,7 +20,7 @@
   "dependencies": {
     "@reactivex/rxjs": "^6.5.4",
     "cheerio": "^1.0.0-rc.3",
-    "got": "^10.2.2",
+    "got": "^10.3.0",
     "rxjs": "^6.5.4"
   },
   "devDependencies": {
