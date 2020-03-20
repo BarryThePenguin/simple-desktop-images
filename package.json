@@ -30,7 +30,7 @@
     "@babel/preset-env": "^7.8.4",
     "@babel/preset-typescript": "^7.8.3",
     "@types/axios": "^0.14.0",
-    "@types/cheerio": "^0.22.15",
+    "@types/cheerio": "^0.22.17",
     "@types/got": "^9.6.9",
     "@types/node": "^13.5.2",
     "@typescript-eslint/eslint-plugin": "^2.16.0",
