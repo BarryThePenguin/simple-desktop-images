@@ -33,7 +33,7 @@
     "@types/cheerio": "^0.22.17",
     "@types/got": "^9.6.9",
     "@types/node": "^13.11.0",
-    "@typescript-eslint/eslint-plugin": "^2.16.0",
+    "@typescript-eslint/eslint-plugin": "^2.27.0",
     "@typescript-eslint/parser": "^2.27.0",
     "ava": "^3.6.0",
     "codecov": "^3.6.5",
