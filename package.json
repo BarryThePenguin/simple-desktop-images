@@ -18,7 +18,7 @@
     "type-check:watch": "tsc --noEmit --watch"
   },
   "dependencies": {
-    "@reactivex/rxjs": "^6.5.4",
+    "@reactivex/rxjs": "^6.5.5",
     "cheerio": "^1.0.0-rc.3",
     "got": "^10.7.0",
     "rxjs": "^6.5.5"
