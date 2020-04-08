@@ -9,13 +9,12 @@
   },
   "author": "Jonathan Haines",
   "scripts": {
-    "coverage": "nyc report > coverage.lcov && codecov",
-    "prestart": "tsc",
-    "start": "node lib/index.js",
+    "build": "del-cli dist && tsc",
+    "prepare": "npm run build",
+    "pretest": "npm run build",
+    "start": "node dist/src/index.js",
     "test": "xo && tsc --noEmit && nyc ava",
-    "test:watch": "ava --watch",
-    "type-check": "tsc --noEmit",
-    "type-check:watch": "tsc --noEmit --watch"
+    "test:watch": "ava --watch"
   },
   "dependencies": {
     "@reactivex/rxjs": "^6.5.5",
@@ -24,64 +23,30 @@
     "rxjs": "^6.5.5"
   },
   "devDependencies": {
-    "@ava/babel": "^1.0.1",
-    "@babel/cli": "^7.8.4",
-    "@babel/core": "^7.9.0",
-    "@babel/preset-env": "^7.9.5",
-    "@babel/preset-typescript": "^7.9.0",
+    "@ava/typescript": "^1.1.1",
     "@types/axios": "^0.14.0",
     "@types/cheerio": "^0.22.17",
-    "@types/got": "^9.6.9",
     "@types/node": "^13.11.0",
-    "@typescript-eslint/eslint-plugin": "^2.27.0",
-    "@typescript-eslint/parser": "^2.27.0",
     "ava": "^3.6.0",
     "codecov": "^3.6.5",
-    "eslint-config-xo-typescript": "^0.27.0",
+    "del-cli": "^3.0.0",
     "nock": "^12.0.3",
     "nyc": "^15.0.1",
+    "prettier": "^1.19.1",
     "prettier-plugin-package": "^0.3.1",
     "ts-node": "^8.8.2",
     "typescript": "^3.8.3",
     "xo": "^0.28.3"
   },
   "ava": {
-    "concurrency": 4,
-    "timeout": "1m",
-    "extensions": [
-      "ts"
-    ],
-    "require": [
-      "ts-node/register/transpile-only"
-    ]
-  },
-  "babel": {
-    "presets": [
-      "@babel/typescript",
-      [
-        "@babel/preset-env",
-        {
-          "targets": {
-            "node": "current"
-          }
-        }
-      ]
-    ]
-  },
-  "nyc": {
-    "reporter": [
-      "lcov",
-      "text-lcov"
-    ]
+    "typescript": {
+      "rewritePaths": {
+        "test/": "dist/test/"
+      }
+    }
   },
   "xo": {
     "prettier": true,
-    "extends": [
-      "xo-typescript"
-    ],
-    "extensions": [
-      "ts"
-    ],
     "envs": [
       "node"
     ]

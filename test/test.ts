@@ -24,7 +24,7 @@ test('no result', async t => {
 
 	const images$ = await client.start('.selector');
 
-	return images$.pipe(toArray()).forEach(data => {
+	return images$.pipe(toArray()).forEach((data: Readonly<FileDownload[]>) => {
 		t.deepEqual(data, []);
 	});
 });
@@ -51,6 +51,20 @@ test('incorrect content-type', async t => {
 		.defaultReplyHeaders({
 			'Content-Type': 'text/not-html'
 		})
+		.get('/')
+		.reply(200);
+
+	const client = new Client(prefixUrl, dlDir);
+
+	const images$ = await client.start('.selector');
+
+	return images$.pipe(toArray()).forEach(data => {
+		t.deepEqual(data, []);
+	});
+});
+
+test('no content-type', async t => {
+	nock(prefixUrl)
 		.get('/')
 		.reply(200);
 
@@ -102,14 +116,14 @@ test('client constructor', async t => {
 	return images$.pipe(toArray()).forEach(data => {
 		t.deepEqual(data, [
 			new FileDownload(
-				'/browse/desktops/2016/feb/02/image-two',
+				dlDir,
 				'/browse/desktops/2017/jul/28/image-one',
-				dlDir
+				'/browse/desktops/2016/feb/02/image-two'
 			),
 			new FileDownload(
-				'/download/?desktop=5678',
+				dlDir,
 				'/browse/desktops/2016/feb/02/image-two',
-				dlDir
+				'/download/?desktop=5678'
 			)
 		]);
 	});

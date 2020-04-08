@@ -1,6 +1,6 @@
 import {join} from 'path';
 import {load} from 'cheerio';
-import got, {Got, Response, Options} from 'got';
+import got, {Got, CancelableRequest, Response, AfterResponseHook} from 'got';
 import {Observable, Subject} from 'rxjs';
 import {filter, startWith, mergeMap} from 'rxjs/operators';
 
@@ -48,6 +48,21 @@ function imageName(dlDir: string, imagePath: string): string {
 	return join(dlDir, `${savePath}.png`);
 }
 
+const loadHtml: AfterResponseHook = (response: Response) => {
+	const {headers, body} = response;
+	const contentType = headers['content-type'] ?? '';
+
+	if (typeof body === 'string' && contentType.includes('text/html')) {
+		response.body = load(body);
+	}
+
+	return response;
+};
+
+function isFileDownload(file: FileDownload | undefined): file is FileDownload {
+	return file instanceof FileDownload;
+}
+
 export class FileDownload {
 	dlDir: string;
 
@@ -55,9 +70,9 @@ export class FileDownload {
 
 	path: string;
 
-	url: string;
+	url?: string;
 
-	constructor(url: string, imagePath: string, dlDir: string) {
+	constructor(dlDir: string, imagePath: string, url?: string) {
 		this.url = url;
 		this.imagePath = imagePath;
 		this.dlDir = dlDir;
@@ -69,7 +84,7 @@ export class FileDownload {
 export class Client {
 	httpClient: Got;
 
-	images$: Subject<string | undefined>;
+	images$: Subject<string>;
 
 	dlDir: string;
 
@@ -78,27 +93,16 @@ export class Client {
 		this.httpClient = got.extend({
 			prefixUrl,
 			hooks: {
-				afterResponse: [
-					response => {
-						const {headers, body} = response;
-						const contentType = headers['content-type'] ?? '';
-
-						if (typeof body === 'string' && contentType.includes('text/html')) {
-							response.body = load(body);
-						}
-
-						return response;
-					}
-				]
+				afterResponse: [loadHtml]
 			}
 		});
 		this.dlDir = dlDir;
 		this.images$ = new Subject();
 	}
 
-	async start(query: string): Promise<Observable<FileDownload | undefined>> {
+	async start(query: string): Promise<Observable<FileDownload>> {
 		// Get the home page
-		const response = await this.httpClient.get<CheerioStatic | undefined>('');
+		const response = await this.httpClient.get<CheerioStatic>('');
 		const $ = response.body;
 		// Load the home page and find the first image
 		let url;
@@ -110,16 +114,12 @@ export class Client {
 		return this.images$.pipe(
 			startWith(url),
 			mergeMap(async nextUrl => this.nextImage(nextUrl), 4),
-			filter(file => file instanceof FileDownload)
+			filter(isFileDownload)
 		);
 	}
 
-	async download(
-		uri: string,
-		options?: Options
-	): Promise<Response<CheerioStatic>> {
-		// @ts-ignore
-		return this.httpClient.get(uri, options);
+	download(url: string): CancelableRequest<Response<CheerioStatic>> {
+		return this.httpClient.get<CheerioStatic>(url);
 	}
 
 	// Load the image and write it to the stream
@@ -137,9 +137,7 @@ export class Client {
 
 			const url = $('.desktop > a').attr('href');
 
-			if (url) {
-				return new FileDownload(url, imageUrl, this.dlDir);
-			}
+			return new FileDownload(this.dlDir, imageUrl, url);
 		}
 
 		this.images$.complete();

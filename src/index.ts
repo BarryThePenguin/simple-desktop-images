@@ -24,19 +24,17 @@ const dlDir = resolve('/Users/jonno/Dropbox/desktop-backgrounds');
 	}
 
 	// Save the image to the file system
-	async function download(file?: FileDownload): Promise<void> {
-		if (file) {
+	async function download(file: FileDownload): Promise<void> {
+		if (file.url) {
 			const {url, path} = file;
 			let handler;
 
 			try {
 				handler = await fs.open(path, 'wx', 0o644);
 
-				const response = await client.download(url, {
-					responseType: 'buffer'
-				});
+				const response = await client.download(url).buffer();
 
-				await handler.writeFile(response.body, {encoding: 'utf-8'});
+				await handler.writeFile(response, {encoding: 'utf-8'});
 			} catch (error) {
 				if (error.code === 'EEXIST') {
 					console.log('file exists', path);
