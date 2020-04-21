@@ -6,7 +6,15 @@ const prefixUrl = 'http://simpledesktops.com';
 // REVIEW: const dlDir = resolve('./images');
 const dlDir = resolve('/Users/jonno/Dropbox/desktop-backgrounds');
 
-(async client => {
+type ErrorExists = Error & {
+	code?: string;
+};
+
+function fileExistsError(error: ErrorExists): boolean {
+	return error.code === 'EEXIST';
+}
+
+(async (client) => {
 	try {
 		const images$ = await client.start('.desktops > .edge > .desktop > a');
 
@@ -36,7 +44,7 @@ const dlDir = resolve('/Users/jonno/Dropbox/desktop-backgrounds');
 
 				await handler.writeFile(response, {encoding: 'utf-8'});
 			} catch (error) {
-				if (error.code === 'EEXIST') {
+				if (fileExistsError(error)) {
 					console.log('file exists', path);
 					return;
 				}

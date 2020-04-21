@@ -7,7 +7,7 @@ const dlDir = './fixtures/test';
 
 const prefixUrl = 'http://www.example.com';
 
-test('no result', async t => {
+test('no result', async (t) => {
 	nock(prefixUrl)
 		.defaultReplyHeaders({
 			'Content-Type': 'text/html'
@@ -24,12 +24,12 @@ test('no result', async t => {
 
 	const images$ = await client.start('.selector');
 
-	return images$.pipe(toArray()).forEach((data: Readonly<FileDownload[]>) => {
+	return images$.pipe(toArray()).forEach((data) => {
 		t.deepEqual(data, []);
 	});
 });
 
-test('empty body', async t => {
+test('empty body', async (t) => {
 	nock(prefixUrl)
 		.defaultReplyHeaders({
 			'Content-Type': 'text/html'
@@ -41,12 +41,12 @@ test('empty body', async t => {
 
 	const images$ = await client.start('.selector');
 
-	return images$.pipe(toArray()).forEach(data => {
+	return images$.pipe(toArray()).forEach((data) => {
 		t.deepEqual(data, []);
 	});
 });
 
-test('incorrect content-type', async t => {
+test('incorrect content-type', async (t) => {
 	nock(prefixUrl)
 		.defaultReplyHeaders({
 			'Content-Type': 'text/not-html'
@@ -58,26 +58,24 @@ test('incorrect content-type', async t => {
 
 	const images$ = await client.start('.selector');
 
-	return images$.pipe(toArray()).forEach(data => {
+	return images$.pipe(toArray()).forEach((data) => {
 		t.deepEqual(data, []);
 	});
 });
 
-test('no content-type', async t => {
-	nock(prefixUrl)
-		.get('/')
-		.reply(200);
+test('no content-type', async (t) => {
+	nock(prefixUrl).get('/').reply(200);
 
 	const client = new Client(prefixUrl, dlDir);
 
 	const images$ = await client.start('.selector');
 
-	return images$.pipe(toArray()).forEach(data => {
+	return images$.pipe(toArray()).forEach((data) => {
 		t.deepEqual(data, []);
 	});
 });
 
-test('client constructor', async t => {
+test('client constructor', async (t) => {
 	nock(prefixUrl)
 		.defaultReplyHeaders({
 			'Content-Type': 'text/html'
@@ -113,7 +111,7 @@ test('client constructor', async t => {
 
 	const images$ = await client.start('.selector');
 
-	return images$.pipe(toArray()).forEach(data => {
+	return images$.pipe(toArray()).forEach((data) => {
 		t.deepEqual(data, [
 			new FileDownload(
 				dlDir,

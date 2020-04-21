@@ -113,7 +113,7 @@ export class Client {
 
 		return this.images$.pipe(
 			startWith(url),
-			mergeMap(async nextUrl => this.nextImage(nextUrl), 4),
+			mergeMap(async (nextUrl) => this.nextImage(nextUrl), 4),
 			filter(isFileDownload)
 		);
 	}
