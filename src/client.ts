@@ -42,7 +42,7 @@ function imageName(dlDir: string, imagePath: string): string {
 	const savePath = imagePath
 		.replace('/browse/desktops/', '')
 		.split('/')
-		.reduce(renameFile)
+		.reduce((acc, file, index) => renameFile(acc, file, index))
 		.trim();
 
 	return join(dlDir, `${savePath}.png`);
