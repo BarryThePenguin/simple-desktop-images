@@ -31,7 +31,7 @@
     "codecov": "^3.7.0",
     "del-cli": "^3.0.1",
     "nock": "^12.0.3",
-    "nyc": "^15.0.1",
+    "nyc": "^15.1.0",
     "prettier": "^2.0.5",
     "prettier-plugin-package": "^1.0.0",
     "ts-node": "^9.0.0",
