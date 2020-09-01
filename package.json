@@ -35,7 +35,7 @@
     "prettier-plugin-package": "^1.0.0",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.2",
-    "xo": "^0.30.0"
+    "xo": "^0.33.1"
   },
   "ava": {
     "typescript": {
