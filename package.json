@@ -29,7 +29,7 @@
     "ava": "^3.12.1",
     "codecov": "^3.7.2",
     "del-cli": "^3.0.1",
-    "nock": "^12.0.3",
+    "nock": "^13.0.4",
     "nyc": "^15.1.0",
     "prettier": "^2.1.1",
     "prettier-plugin-package": "^1.0.0",
