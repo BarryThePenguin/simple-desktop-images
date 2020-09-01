@@ -26,25 +26,28 @@ function parseMonth(month: string): string {
 }
 
 // Rename the image file
-function renameFile(previous: string, current: string, index: number): string {
-	const digit = current.padStart(2, '0');
-	const part = [
-		current,
-		`${previous}-${parseMonth(current)}`,
-		`${previous}-${digit}`
-	];
-	const result = part[index] || `${previous} ${current.replace(' ', '-')}`;
-	return decodeURIComponent(result);
+function renameFile(
+	year: string,
+	month: string,
+	day: string,
+	rest: string
+): string {
+	const result = `${year}-${parseMonth(month)}-${day.padStart(2, '0')} ${rest}`;
+	return decodeURIComponent(result).trim();
 }
 
 // Standardise image names
 function imageName(dlDir: string, imagePath: string): string {
-	const savePath = imagePath
+	const [year, month, day, ...rest] = imagePath
 		.replace('/browse/desktops/', '')
-		.split('/')
-		.reduce((acc, file, index) => renameFile(acc, file, index))
-		.trim();
+		.split('/');
 
+	const savePath = renameFile(
+		year,
+		month,
+		day,
+		rest.join(' ').trim().replace(' ', '-')
+	);
 	return join(dlDir, `${savePath}.png`);
 }
 
@@ -119,13 +122,13 @@ export class Client {
 	}
 
 	download(url: string): CancelableRequest<Response<CheerioStatic>> {
-		return this.httpClient.get<CheerioStatic>(url);
+		return this.httpClient.get<CheerioStatic>(url.replace(/^\/+/, ''));
 	}
 
 	// Load the image and write it to the stream
 	async nextImage(imageUrl?: string): Promise<FileDownload | undefined> {
 		if (imageUrl) {
-			const response = await this.download(imageUrl.replace(/^\/+/, ''));
+			const response = await this.download(imageUrl);
 			const $ = response.body;
 			const next = $('a.back').attr('href');
 
