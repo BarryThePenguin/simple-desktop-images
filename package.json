@@ -25,7 +25,7 @@
     "@ava/typescript": "^1.1.1",
     "@types/axios": "^0.14.0",
     "@types/cheerio": "^0.22.21",
-    "@types/node": "^14.6.4",
+    "@types/node": "^14.11.1",
     "ava": "^3.12.1",
     "codecov": "^3.7.2",
     "del-cli": "^3.0.1",
