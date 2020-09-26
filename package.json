@@ -24,7 +24,7 @@
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
     "@types/axios": "^0.14.0",
-    "@types/cheerio": "^0.22.21",
+    "@types/cheerio": "^0.22.22",
     "@types/node": "^14.11.2",
     "ava": "^3.12.1",
     "codecov": "^3.7.2",
