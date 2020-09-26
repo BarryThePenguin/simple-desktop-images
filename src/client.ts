@@ -1,5 +1,5 @@
 import {join} from 'path';
-import {load} from 'cheerio';
+import cheerio from 'cheerio';
 import got, {Got, CancelableRequest, Response, AfterResponseHook} from 'got';
 import {Observable, Subject} from 'rxjs';
 import {filter, startWith, mergeMap} from 'rxjs/operators';
@@ -56,7 +56,7 @@ const loadHtml: AfterResponseHook = (response: Response) => {
 	const contentType = headers['content-type'] ?? '';
 
 	if (typeof body === 'string' && contentType.includes('text/html')) {
-		response.body = load(body);
+		response.body = cheerio.load(body);
 	}
 
 	return response;
@@ -105,7 +105,7 @@ export class Client {
 
 	async start(query: string): Promise<Observable<FileDownload>> {
 		// Get the home page
-		const response = await this.httpClient.get<CheerioStatic>('');
+		const response = await this.httpClient.get<cheerio.Root>('');
 		const $ = response.body;
 		// Load the home page and find the first image
 		let url;
@@ -121,8 +121,8 @@ export class Client {
 		);
 	}
 
-	download(url: string): CancelableRequest<Response<CheerioStatic>> {
-		return this.httpClient.get<CheerioStatic>(url.replace(/^\/+/, ''));
+	download(url: string): CancelableRequest<Response<cheerio.Root>> {
+		return this.httpClient.get<cheerio.Root>(url.replace(/^\/+/, ''));
 	}
 
 	// Load the image and write it to the stream
