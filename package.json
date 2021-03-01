@@ -19,7 +19,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.5",
     "dot-prop": "^6.0.1",
-    "got": "^11.8.1"
+    "got": "^11.8.2"
   },
   "devDependencies": {
     "@ava/typescript": "^1.1.1",
