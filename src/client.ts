@@ -1,6 +1,7 @@
 import got, {Got, CancelableRequest, Response} from 'got';
 import {getHref, loadHtml} from './util';
 import {FileDownload} from './file-download';
+import type {CheerioAPI} from 'cheerio';
 
 export class Client {
 	httpClient: Got;
@@ -20,7 +21,7 @@ export class Client {
 
 	async *start(query: string) {
 		// Get the home page
-		const response = await this.httpClient.get<cheerio.Root>('');
+		const response = await this.httpClient.get<CheerioAPI>('');
 		const $ = response.body;
 		// Load the home page and find the first image
 		let url: string | undefined;
@@ -40,8 +41,8 @@ export class Client {
 		}
 	}
 
-	download(url: string): CancelableRequest<Response<cheerio.Root>> {
-		return this.httpClient.get<cheerio.Root>(url);
+	download(url: string): CancelableRequest<Response<CheerioAPI>> {
+		return this.httpClient.get<CheerioAPI>(url);
 	}
 
 	// Load the image and write it to the stream
