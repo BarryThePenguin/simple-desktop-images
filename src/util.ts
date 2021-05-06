@@ -1,4 +1,4 @@
-import cheerio from 'cheerio';
+import cheerio, {Cheerio, Node} from 'cheerio';
 import {has} from 'dot-prop';
 import {AfterResponseHook, Response} from 'got';
 
@@ -29,7 +29,7 @@ export function isFileExistsError(error: unknown): error is ErrorExists {
 	);
 }
 
-export function getHref(doc: cheerio.Cheerio): string | undefined {
+export function getHref<T extends Node>(doc: Cheerio<T>): string | undefined {
 	const url = doc.attr('href');
 	return url?.replace(/^\/+/, '');
 }
