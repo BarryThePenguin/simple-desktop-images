@@ -1,6 +1,6 @@
+import {resolve} from 'path';
 import test from 'ava';
 import nock from 'nock';
-import {resolve} from 'path';
 import {Client} from '../src/client';
 import {toArray} from '../src/util';
 
