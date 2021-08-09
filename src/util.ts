@@ -7,7 +7,7 @@ type ErrorExists = Error & {
 };
 
 export function isUnknownObject(
-	target: unknown
+	target: unknown,
 ): target is Record<PropertyKey, unknown> {
 	return target !== null && typeof target === 'object';
 }

@@ -13,8 +13,8 @@ export class Client {
 		this.httpClient = got.extend({
 			prefixUrl,
 			hooks: {
-				afterResponse: [loadHtml]
-			}
+				afterResponse: [loadHtml],
+			},
 		});
 		this.dlDir = dlDir;
 	}
@@ -47,7 +47,7 @@ export class Client {
 
 	// Load the image and write it to the stream
 	private async nextImage(
-		imageUrl: string
+		imageUrl: string,
 	): Promise<{next?: string; file: FileDownload}> {
 		const response = await this.download(imageUrl);
 		const $ = response.body;
@@ -58,8 +58,8 @@ export class Client {
 		return {
 			next,
 			file: new FileDownload(this.dlDir, imageUrl, () =>
-				this.httpClient.stream.get({url})
-			)
+				this.httpClient.stream.get({url}),
+			),
 		};
 	}
 }

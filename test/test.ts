@@ -11,7 +11,7 @@ const prefixUrl = 'http://www.example.com';
 test('no result', async (t) => {
 	const scope = nock(prefixUrl)
 		.defaultReplyHeaders({
-			'Content-Type': 'text/html'
+			'Content-Type': 'text/html',
 		})
 		.get('/')
 		.reply(
@@ -20,7 +20,7 @@ test('no result', async (t) => {
 		<a class="selector">
 		  linkt text
 		</a>
-	`
+	`,
 		);
 
 	const client = new Client(prefixUrl, dlDir);
@@ -36,7 +36,7 @@ test('no result', async (t) => {
 test('empty body', async (t) => {
 	const scope = nock(prefixUrl)
 		.defaultReplyHeaders({
-			'Content-Type': 'text/html'
+			'Content-Type': 'text/html',
 		})
 		.get('/')
 		.reply(200, '');
@@ -54,7 +54,7 @@ test('empty body', async (t) => {
 test('incorrect content-type', async (t) => {
 	const scope = nock(prefixUrl)
 		.defaultReplyHeaders({
-			'Content-Type': 'text/not-html'
+			'Content-Type': 'text/not-html',
 		})
 		.get('/')
 		.reply(200);
@@ -85,7 +85,7 @@ test('no content-type', async (t) => {
 test('client constructor', async (t) => {
 	const scope = nock(prefixUrl)
 		.defaultReplyHeaders({
-			'Content-Type': 'text/html'
+			'Content-Type': 'text/html',
 		})
 		.get('/')
 		.reply(
@@ -94,7 +94,7 @@ test('client constructor', async (t) => {
 		<a class="selector" href="/browse/desktops/2017/jul/28/image-one">
 			linkt text
 		</a>
-	`
+	`,
 		)
 		.get('/browse/desktops/2017/jul/28/image-one')
 		.reply(
@@ -108,7 +108,7 @@ test('client constructor', async (t) => {
 			  link text
 			</a>
 		</div>
-	`
+	`,
 		)
 		.get('/browse/desktops/2016/feb/02/image-two')
 		.reply(
@@ -119,7 +119,7 @@ test('client constructor', async (t) => {
 			  link text
 			</a>
 		</div>
-	`
+	`,
 		);
 
 	const client = new Client(prefixUrl, dlDir);
@@ -131,13 +131,13 @@ test('client constructor', async (t) => {
 	t.like(firstFile, {
 		dlDir,
 		imagePath: 'browse/desktops/2017/jul/28/image-one',
-		path: resolve('./fixtures/test/2017-07-28 image-one.png')
+		path: resolve('./fixtures/test/2017-07-28 image-one.png'),
 	});
 
 	t.like(secondFile, {
 		dlDir,
 		imagePath: 'browse/desktops/2016/feb/02/image-two',
-		path: resolve('./fixtures/test/2016-02-02 image-two.png')
+		path: resolve('./fixtures/test/2016-02-02 image-two.png'),
 	});
 
 	t.true(scope.isDone());
@@ -146,7 +146,7 @@ test('client constructor', async (t) => {
 test('file exists', async (t) => {
 	const scope = nock(prefixUrl)
 		.defaultReplyHeaders({
-			'Content-Type': 'text/html'
+			'Content-Type': 'text/html',
 		})
 		.get('/')
 		.reply(
@@ -155,7 +155,7 @@ test('file exists', async (t) => {
 		<a class="selector" href="/browse/desktops/2020/oct/24/poop">
 			linkt text
 		</a>
-	`
+	`,
 		)
 		.get('/browse/desktops/2020/oct/24/poop')
 		.reply(
@@ -166,7 +166,7 @@ test('file exists', async (t) => {
 			  link text
 			</a>
 		</div>
-	`
+	`,
 		)
 		.get('/download/?desktop=poop')
 		.reply(200, '');
@@ -185,7 +185,7 @@ test('file exists', async (t) => {
 test('directory does not exist', async (t) => {
 	const scope = nock(prefixUrl)
 		.defaultReplyHeaders({
-			'Content-Type': 'text/html'
+			'Content-Type': 'text/html',
 		})
 		.get('/')
 		.reply(
@@ -194,7 +194,7 @@ test('directory does not exist', async (t) => {
 		<a class="selector" href="/browse/desktops/2020/oct/24/poop">
 			linkt text
 		</a>
-	`
+	`,
 		)
 		.get('/browse/desktops/2020/oct/24/poop')
 		.reply(
@@ -205,7 +205,7 @@ test('directory does not exist', async (t) => {
 			  link text
 			</a>
 		</div>
-	`
+	`,
 		)
 		.get('/download/?desktop=poop')
 		.reply(200);

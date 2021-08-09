@@ -19,7 +19,7 @@ const months = [
 	'sep',
 	'oct',
 	'nov',
-	'dec'
+	'dec',
 ];
 
 export function parseMonth(month: string): string {
@@ -32,7 +32,7 @@ function renameFile(
 	year: string,
 	month: string,
 	day: string,
-	rest: string
+	rest: string,
 ): string {
 	const result = `${year}-${parseMonth(month)}-${day.padStart(2, '0')} ${rest}`;
 	return decodeURIComponent(result).trim();
@@ -48,7 +48,7 @@ export function imageName(dlDir: string, imagePath: string): string {
 		year,
 		month,
 		day,
-		rest.join(' ').trim().replace(' ', '-')
+		rest.join(' ').trim().replace(' ', '-'),
 	);
 	return join(dlDir, `${savePath}.png`);
 }
@@ -77,7 +77,7 @@ export class FileDownload {
 		try {
 			await pipe(
 				downloadFile(),
-				createWriteStream(path, {flags: 'wx', mode: 0o644, encoding: 'utf-8'})
+				createWriteStream(path, {flags: 'wx', mode: 0o644, encoding: 'utf-8'}),
 			);
 		} catch (error: unknown) {
 			if (isFileExistsError(error)) {
