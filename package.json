@@ -39,7 +39,8 @@
     "typescript": {
       "rewritePaths": {
         "test/": "dist/test/"
-      }
+      },
+      "compile": false
     }
   },
   "xo": {
