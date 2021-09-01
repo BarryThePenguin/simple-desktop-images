@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@ava/typescript": "^2.0.0",
-    "@types/node": "^16.4.13",
+    "@types/node": "^16.7.10",
     "ava": "^3.15.0",
     "codecov": "^3.8.3",
     "del-cli": "^4.0.1",
