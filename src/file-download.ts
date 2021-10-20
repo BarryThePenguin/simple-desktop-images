@@ -74,18 +74,15 @@ export class FileDownload {
 	async download() {
 		const {downloadFile, path} = this;
 
-		try {
-			await pipe(
-				downloadFile(),
-				createWriteStream(path, {flags: 'wx', mode: 0o644, encoding: 'utf-8'}),
-			);
-		} catch (error: unknown) {
+		return pipe(
+			downloadFile(),
+			createWriteStream(path, {flags: 'wx', mode: 0o644, encoding: 'utf-8'}),
+		).catch((error) => {
 			if (isFileExistsError(error)) {
-				console.log('file exists', path);
-				return;
+				console.log('file already exists', path);
+			} else {
+				console.log('download error', error);
 			}
-
-			console.log('download error', error);
-		}
+		});
 	}
 }

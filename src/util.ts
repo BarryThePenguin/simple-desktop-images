@@ -1,16 +1,5 @@
 import cheerio, {Cheerio, Node} from 'cheerio';
-import {has} from 'dot-prop';
 import {AfterResponseHook, Response} from 'got';
-
-type ErrorExists = Error & {
-	code?: string;
-};
-
-export function isUnknownObject(
-	target: unknown,
-): target is Record<PropertyKey, unknown> {
-	return target !== null && typeof target === 'object';
-}
 
 export const loadHtml: AfterResponseHook = (response: Response) => {
 	const {headers, body} = response;
@@ -23,10 +12,8 @@ export const loadHtml: AfterResponseHook = (response: Response) => {
 	return response;
 };
 
-export function isFileExistsError(error: unknown): error is ErrorExists {
-	return (
-		isUnknownObject(error) && has(error, 'code') && error.code === 'EEXIST'
-	);
+export function isFileExistsError(error: NodeJS.ErrnoException): boolean {
+	return error.code === 'EEXIST';
 }
 
 export function getHref<T extends Node>(doc: Cheerio<T>): string | undefined {
