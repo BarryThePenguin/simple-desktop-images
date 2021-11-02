@@ -1,5 +1,5 @@
-import {resolve} from 'path';
-import {Client} from './client';
+import {resolve} from 'node:path';
+import {Client} from './client.js';
 
 const prefixUrl = 'http://simpledesktops.com';
 // REVIEW: const dlDir = resolve('./images');
