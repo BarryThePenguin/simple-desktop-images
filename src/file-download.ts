@@ -1,8 +1,8 @@
-import {join} from 'path';
-import {pipeline, Readable} from 'stream';
-import {promisify} from 'util';
-import {createWriteStream} from 'fs';
-import {isFileExistsError} from './util';
+import {join} from 'node:path';
+import {pipeline, Readable} from 'node:stream';
+import {promisify} from 'node:util';
+import {createWriteStream} from 'node:fs';
+import {isFileExistsError} from './util.js';
 
 const pipe = promisify(pipeline);
 

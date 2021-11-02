@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Image scraper for simple desktops",
   "license": "MIT",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/barrythepenguin/simple-desktop-images.git"
@@ -13,7 +14,7 @@
     "prestart": "npm run build",
     "pretest": "npm run build",
     "start": "node dist/src/index.js",
-    "test": "xo && tsc --noEmit && nyc ava",
+    "test": "xo && tsc --noEmit && c8 ava",
     "test:watch": "ava --watch"
   },
   "dependencies": {
@@ -23,11 +24,11 @@
   "devDependencies": {
     "@ava/typescript": "^3.0.0",
     "@types/node": "^16.11.6",
-    "ava": "^3.15.0",
+    "ava": "^4.0.0-rc.1",
+    "c8": "^7.10.0",
     "codecov": "^3.8.3",
     "del-cli": "^4.0.1",
     "nock": "^13.1.4",
-    "nyc": "^15.1.0",
     "prettier": "^2.4.1",
     "prettier-plugin-package": "^1.3.0",
     "ts-node": "^10.4.0",
@@ -46,9 +47,6 @@
     "prettier": true,
     "envs": [
       "node"
-    ],
-    "rules": {
-      "unicorn/prefer-node-protocol": "off"
-    }
+    ]
   }
 }

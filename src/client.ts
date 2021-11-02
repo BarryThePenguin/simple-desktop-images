@@ -1,7 +1,7 @@
 import got, {Got, CancelableRequest, Response} from 'got';
 import type {CheerioAPI} from 'cheerio';
-import {getHref, loadHtml} from './util';
-import {FileDownload} from './file-download';
+import {getHref, loadHtml} from './util.js';
+import {FileDownload} from './file-download.js';
 
 export class Client {
 	httpClient: Got;
