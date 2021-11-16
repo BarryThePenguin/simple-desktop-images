@@ -22,7 +22,7 @@
     "got": "^11.8.2"
   },
   "devDependencies": {
-    "@ava/typescript": "^3.0.0",
+    "@ava/typescript": "^3.0.1",
     "@types/node": "^16.11.6",
     "ava": "^4.0.0-rc.1",
     "c8": "^7.10.0",
