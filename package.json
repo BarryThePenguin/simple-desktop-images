@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@ava/typescript": "^3.0.1",
-    "@types/node": "^16.11.8",
+    "@types/node": "^16.11.11",
     "ava": "^4.0.0-rc.1",
     "c8": "^7.10.0",
     "codecov": "^3.8.3",
