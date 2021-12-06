@@ -29,7 +29,7 @@
     "codecov": "^3.8.3",
     "del-cli": "^4.0.1",
     "nock": "^13.2.1",
-    "prettier": "^2.4.1",
+    "prettier": "^2.5.1",
     "prettier-plugin-package": "^1.3.0",
     "ts-node": "^10.4.0",
     "typescript": "^4.5.2",
