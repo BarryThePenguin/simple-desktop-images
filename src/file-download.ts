@@ -1,10 +1,8 @@
 import {join} from 'node:path';
-import {pipeline, Readable} from 'node:stream';
-import {promisify} from 'node:util';
+import {Readable} from 'node:stream';
+import {pipeline} from 'node:stream/promises';
 import {createWriteStream} from 'node:fs';
 import {isFileExistsError} from './util.js';
-
-const pipe = promisify(pipeline);
 
 const months = [
 	'pad',
@@ -54,18 +52,15 @@ export function imageName(dlDir: string, imagePath: string): string {
 }
 
 export class FileDownload {
-	dlDir: string;
-
-	imagePath: string;
-
 	path: string;
 
-	downloadFile: () => Readable;
-
-	constructor(dlDir: string, imagePath: string, downloadFile: () => Readable) {
+	constructor(
+		public dlDir: string,
+		public imagePath: string,
+		public downloadFile: () => Readable,
+	) {
 		this.dlDir = dlDir;
 		this.imagePath = imagePath;
-		this.downloadFile = downloadFile;
 
 		this.path = imageName(dlDir, imagePath);
 	}
@@ -74,10 +69,10 @@ export class FileDownload {
 	async download() {
 		const {downloadFile, path} = this;
 
-		return pipe(
+		return pipeline(
 			downloadFile(),
-			createWriteStream(path, {flags: 'wx', mode: 0o644, encoding: 'utf-8'}),
-		).catch((error) => {
+			createWriteStream(path, {flags: 'wx', mode: 0o644, encoding: 'utf8'}),
+		).catch(error => {
 			if (isFileExistsError(error)) {
 				console.log('file already exists', path);
 			} else {

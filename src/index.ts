@@ -6,7 +6,7 @@ const prefixUrl = 'http://simpledesktops.com';
 // const dlDir = resolve('/Users/jonno/Dropbox/desktop-backgrounds');
 const dlDir = resolve('./images');
 
-(async (client) => {
+(async client => {
 	try {
 		const images$ = client.start('.desktops > .edge > .desktop > a');
 

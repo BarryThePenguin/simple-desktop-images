@@ -43,6 +43,13 @@
       "compile": false
     }
   },
+  "prettier": {
+    "arrowParens": "avoid",
+    "bracketSpacing": false,
+    "singleQuote": true,
+    "useTabs": true,
+    "trailingComma": "all"
+  },
   "xo": {
     "prettier": true,
     "envs": [
