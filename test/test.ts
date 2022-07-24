@@ -8,7 +8,7 @@ const dlDir = resolve('./fixtures/test');
 
 const prefixUrl = 'http://www.example.com';
 
-test('no result', async (t) => {
+test('no result', async t => {
 	const scope = nock(prefixUrl)
 		.defaultReplyHeaders({
 			'Content-Type': 'text/html',
@@ -33,7 +33,7 @@ test('no result', async (t) => {
 	t.true(scope.isDone());
 });
 
-test('empty body', async (t) => {
+test('empty body', async t => {
 	const scope = nock(prefixUrl)
 		.defaultReplyHeaders({
 			'Content-Type': 'text/html',
@@ -51,7 +51,7 @@ test('empty body', async (t) => {
 	t.true(scope.isDone());
 });
 
-test('incorrect content-type', async (t) => {
+test('incorrect content-type', async t => {
 	const scope = nock(prefixUrl)
 		.defaultReplyHeaders({
 			'Content-Type': 'text/not-html',
@@ -69,7 +69,7 @@ test('incorrect content-type', async (t) => {
 	t.true(scope.isDone());
 });
 
-test('no content-type', async (t) => {
+test('no content-type', async t => {
 	const scope = nock(prefixUrl).get('/').reply(200);
 
 	const client = new Client(prefixUrl, dlDir);
@@ -82,7 +82,7 @@ test('no content-type', async (t) => {
 	t.true(scope.isDone());
 });
 
-test('client constructor', async (t) => {
+test('client constructor', async t => {
 	const scope = nock(prefixUrl)
 		.defaultReplyHeaders({
 			'Content-Type': 'text/html',
@@ -143,7 +143,7 @@ test('client constructor', async (t) => {
 	t.true(scope.isDone());
 });
 
-test('file exists', async (t) => {
+test('file exists', async t => {
 	const scope = nock(prefixUrl)
 		.defaultReplyHeaders({
 			'Content-Type': 'text/html',
@@ -182,7 +182,7 @@ test('file exists', async (t) => {
 	t.true(scope.isDone());
 });
 
-test('directory does not exist', async (t) => {
+test('directory does not exist', async t => {
 	const scope = nock(prefixUrl)
 		.defaultReplyHeaders({
 			'Content-Type': 'text/html',
