@@ -1,5 +1,5 @@
 import {join} from 'node:path';
-import {Readable} from 'node:stream';
+import type {Readable} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
 import {createWriteStream} from 'node:fs';
 import {isFileExistsError} from './util.js';
@@ -43,9 +43,9 @@ export function imageName(dlDir: string, imagePath: string): string {
 		.split('/');
 
 	const savePath = renameFile(
-		year,
-		month,
-		day,
+		year ?? '',
+		month ?? '',
+		day ?? '',
 		rest.join(' ').trim().replace(' ', '-'),
 	);
 	return join(dlDir, `${savePath}.png`);

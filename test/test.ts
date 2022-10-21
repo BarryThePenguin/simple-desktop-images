@@ -177,7 +177,7 @@ test('file exists', async t => {
 
 	const [firstFile] = await toArray(images$);
 
-	await firstFile.download();
+	await firstFile?.download();
 
 	t.true(scope.isDone());
 });
@@ -216,7 +216,7 @@ test('directory does not exist', async t => {
 
 	const [firstFile] = await toArray(images$);
 
-	await firstFile.download();
+	await firstFile?.download();
 
 	t.true(scope.isDone());
 });

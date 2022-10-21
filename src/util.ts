@@ -1,5 +1,5 @@
 import cheerio, {Cheerio, Node} from 'cheerio';
-import {AfterResponseHook, Response} from 'got';
+import type {AfterResponseHook, Response} from 'got';
 
 export const loadHtml: AfterResponseHook = (response: Response) => {
 	const {headers, body} = response;

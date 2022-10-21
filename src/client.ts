@@ -48,7 +48,7 @@ export class Client {
 	// Load the image and write it to the stream
 	private async nextImage(
 		imageUrl: string,
-	): Promise<{next?: string; file: FileDownload}> {
+	): Promise<{next: string | undefined; file: FileDownload}> {
 		const response = await this.download(imageUrl);
 		const $ = response.body;
 
