@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@ava/typescript": "^3.0.1",
-    "@esbuild-kit/esm-loader": "^2.5.0",
+    "@esbuild-kit/esm-loader": "^2.5.5",
     "@tsconfig/node18-strictest-esm": "^1.0.1",
     "@types/node": "^18.11.19",
     "ava": "^5.2.0",
