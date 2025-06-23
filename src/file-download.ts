@@ -2,7 +2,7 @@ import {join} from 'node:path';
 import type {Readable} from 'node:stream';
 import {pipeline} from 'node:stream/promises';
 import {createWriteStream} from 'node:fs';
-import {isFileExistsError} from './util.js';
+import {isFileExistsError} from './util.ts';
 
 const months = [
 	'pad',
@@ -52,32 +52,51 @@ export function imageName(dlDir: string, imagePath: string): string {
 }
 
 export class FileDownload {
-	path: string;
+	readonly #dlDir: string;
 
-	constructor(
-		public dlDir: string,
-		public imagePath: string,
-		public downloadFile: () => Readable,
-	) {
-		this.dlDir = dlDir;
-		this.imagePath = imagePath;
+	readonly #imagePath: string;
 
-		this.path = imageName(dlDir, imagePath);
+	readonly #downloadFile: () => Readable;
+
+	readonly #path: string;
+
+	get dlDir(): string {
+		return this.#dlDir;
+	}
+
+	get imagePath(): string {
+		return this.#imagePath;
+	}
+
+	get path(): string {
+		return this.#path;
+	}
+
+	constructor(dlDir: string, imagePath: string, downloadFile: () => Readable) {
+		this.#dlDir = dlDir;
+		this.#imagePath = imagePath;
+		this.#downloadFile = downloadFile;
+
+		this.#path = imageName(dlDir, imagePath);
 	}
 
 	// Save the image to the file system
 	async download() {
-		const {downloadFile, path} = this;
-
-		return pipeline(
-			downloadFile(),
-			createWriteStream(path, {flags: 'wx', mode: 0o644, encoding: 'utf8'}),
-		).catch(error => {
+		try {
+			await pipeline(
+				this.#downloadFile(),
+				createWriteStream(this.#path, {
+					flags: 'wx',
+					mode: 0o644,
+					encoding: 'utf8',
+				}),
+			);
+		} catch (error: unknown) {
 			if (isFileExistsError(error)) {
-				console.log('file already exists', path);
+				console.log('file already exists', this.#path);
 			} else {
 				console.log('download error', error);
 			}
-		});
+		}
 	}
 }

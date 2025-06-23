@@ -1,8 +1,8 @@
 import {resolve} from 'node:path';
 import test from 'ava';
 import nock from 'nock';
-import {Client} from '../src/client.js';
-import {toArray} from '../src/util.js';
+import {Client} from '../src/client.ts';
+import {toArray} from '../src/util.ts';
 
 const dlDir = resolve('./fixtures/test');
 
