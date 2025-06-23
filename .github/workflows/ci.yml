@@ -4,17 +4,15 @@ on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3.6.0
-      with:
-        node-version: '18'
-        cache: 'npm'
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3.6.0
+        with:
+          node-version: '24'
+          cache: 'npm'
 
-    - run: npm ci
-    - run: npm run build
-    - run: npm test
-    - uses: codecov/codecov-action@v3.1.1
+      - run: npm ci
+      - run: npm test
+      - uses: codecov/codecov-action@v3.1.1
