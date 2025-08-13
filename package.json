@@ -62,13 +62,6 @@
     "lines": 100,
     "statements": 100
   },
-  "prettier": {
-    "arrowParens": "avoid",
-    "bracketSpacing": false,
-    "singleQuote": true,
-    "useTabs": true,
-    "trailingComma": "all"
-  },
   "xo": {
     "prettier": "compat"
   }

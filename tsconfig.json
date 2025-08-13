@@ -7,7 +7,5 @@
 	"compileOnSave": true,
 	"compilerOptions": {
 		"outDir": "./dist"
-	},
-	"include": ["src", "test"],
-	"exclude": ["node_modules"]
+	}
 }

@@ -1,7 +1,7 @@
-import got, {type Got, type CancelableRequest, type Response} from 'got';
-import type {CheerioAPI} from 'cheerio';
-import {getHref, loadHtml} from './util.ts';
-import {FileDownload} from './file-download.ts';
+import got, { type Got, type CancelableRequest, type Response } from "got";
+import type { CheerioAPI } from "cheerio";
+import { getHref, loadHtml } from "./util.ts";
+import { FileDownload } from "./file-download.ts";
 
 export class Client {
 	httpClient: Got;
@@ -21,12 +21,12 @@ export class Client {
 
 	async *start(query: string) {
 		// Get the home page
-		const response = await this.httpClient.get<CheerioAPI>('');
+		const response = await this.httpClient.get<CheerioAPI>("");
 		const $ = response.body;
 		// Load the home page and find the first image
 		let url: string | undefined;
 
-		if (typeof $ === 'function') {
+		if (typeof $ === "function") {
 			url = getHref($(query));
 		}
 
@@ -34,7 +34,7 @@ export class Client {
 			if (!url) break;
 
 			// eslint-disable-next-line no-await-in-loop
-			const {file, next} = await this.nextImage(url);
+			const { file, next } = await this.nextImage(url);
 			url = next;
 
 			yield file;
@@ -48,17 +48,17 @@ export class Client {
 	// Load the image and write it to the stream
 	private async nextImage(
 		imageUrl: string,
-	): Promise<{next: string | undefined; file: FileDownload}> {
+	): Promise<{ next: string | undefined; file: FileDownload }> {
 		const response = await this.download(imageUrl);
 		const $ = response.body;
 
-		const next = getHref($('a.back'));
-		const url = getHref($('.desktop > a'));
+		const next = getHref($("a.back"));
+		const url = getHref($(".desktop > a"));
 
 		return {
 			next,
 			file: new FileDownload(this.dlDir, imageUrl, () =>
-				this.httpClient.stream.get({url}),
+				this.httpClient.stream.get({ url }),
 			),
 		};
 	}
