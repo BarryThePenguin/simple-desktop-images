@@ -2,7 +2,6 @@ import { join } from "node:path";
 import type { Readable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { createWriteStream } from "node:fs";
-import { isFileExistsError } from "./util.ts";
 
 const months = [
 	"pad",
@@ -39,7 +38,7 @@ function renameFile(
 // Standardise image names
 export function imageName(dlDir: string, imagePath: string): string {
 	const [year, month, day, ...rest] = imagePath
-		.replace("browse/desktops/", "")
+		.replace("/browse/desktops/", "")
 		.split("/");
 
 	const savePath = renameFile(
@@ -56,7 +55,7 @@ export class FileDownload {
 
 	readonly #imagePath: string;
 
-	readonly #downloadFile: () => Readable;
+	readonly #downloadFile: () => Promise<Readable>;
 
 	readonly #path: string;
 
@@ -72,7 +71,11 @@ export class FileDownload {
 		return this.#path;
 	}
 
-	constructor(dlDir: string, imagePath: string, downloadFile: () => Readable) {
+	constructor(
+		dlDir: string,
+		imagePath: string,
+		downloadFile: () => Promise<Readable>,
+	) {
 		this.#dlDir = dlDir;
 		this.#imagePath = imagePath;
 		this.#downloadFile = downloadFile;
@@ -84,7 +87,7 @@ export class FileDownload {
 	async download() {
 		try {
 			await pipeline(
-				this.#downloadFile(),
+				await this.#downloadFile(),
 				createWriteStream(this.#path, {
 					flags: "wx",
 					mode: 0o644,
@@ -92,10 +95,10 @@ export class FileDownload {
 				}),
 			);
 		} catch (error: unknown) {
-			if (isFileExistsError(error)) {
+			if ((error as NodeJS.ErrnoException).code === "EEXIST") {
 				console.log("file already exists", this.#path);
 			} else {
-				console.log("download error", error);
+				console.error("download error", error);
 			}
 		}
 	}

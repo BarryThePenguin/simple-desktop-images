@@ -1,38 +1,33 @@
-import got, { type Got, type CancelableRequest, type Response } from "got";
-import type { CheerioAPI } from "cheerio";
-import { getHref, loadHtml } from "./util.ts";
+import * as cheerio from "cheerio";
+import type * as undici from "undici";
 import { FileDownload } from "./file-download.ts";
 
+type ClientOptions = {
+	agent: undici.Dispatcher;
+	dlDir: string;
+	origin: string;
+};
+
 export class Client {
-	httpClient: Got;
+	http: undici.Dispatcher;
 
 	dlDir: string;
 
-	constructor(prefixUrl: string, dlDir: string) {
-		// Default httpClient
-		this.httpClient = got.extend({
-			prefixUrl,
-			hooks: {
-				afterResponse: [loadHtml],
-			},
-		});
+	origin: string;
+
+	constructor({ agent, dlDir, origin }: ClientOptions) {
 		this.dlDir = dlDir;
+		this.http = agent;
+		this.origin = origin;
 	}
 
-	async *start(query: string) {
+	async *start(query: string): AsyncIterable<FileDownload> {
 		// Get the home page
-		const response = await this.httpClient.get<CheerioAPI>("");
-		const $ = response.body;
+		const $ = await this.fromPath("/");
 		// Load the home page and find the first image
-		let url: string | undefined;
+		let url = $(query).attr("href");
 
-		if (typeof $ === "function") {
-			url = getHref($(query));
-		}
-
-		while (true) {
-			if (!url) break;
-
+		while (typeof url === "string") {
 			// eslint-disable-next-line no-await-in-loop
 			const { file, next } = await this.nextImage(url);
 			url = next;
@@ -41,25 +36,34 @@ export class Client {
 		}
 	}
 
-	download(url: string): CancelableRequest<Response<CheerioAPI>> {
-		return this.httpClient.get<CheerioAPI>(url);
+	private async fromPath(path: string) {
+		const response = await this.http.request({
+			method: "GET",
+			path,
+			origin: this.origin,
+		});
+		const content = await response.body.text();
+		return cheerio.load(content);
 	}
 
-	// Load the image and write it to the stream
+	/**
+	 * Load the image and write it to the stream
+	 */
 	private async nextImage(
 		imageUrl: string,
 	): Promise<{ next: string | undefined; file: FileDownload }> {
-		const response = await this.download(imageUrl);
-		const $ = response.body;
+		const { dlDir, http, origin } = this;
+		const $ = await this.fromPath(imageUrl);
 
-		const next = getHref($("a.back"));
-		const url = getHref($(".desktop > a"));
+		const next = $("a.back").attr("href");
+		const path = $(".desktop > a").attr("href") ?? "";
 
 		return {
 			next,
-			file: new FileDownload(this.dlDir, imageUrl, () =>
-				this.httpClient.stream.get({ url }),
-			),
+			file: new FileDownload(dlDir, imageUrl, async () => {
+				const response = await http.request({ method: "GET", path, origin });
+				return response.body;
+			}),
 		};
 	}
 }
