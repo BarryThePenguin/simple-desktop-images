@@ -18,3 +18,5 @@ jobs:
         env:
           NODE_V8_COVERAGE: coverage
       - uses: codecov/codecov-action@v5.4.3
+      - uses: codecov/test-results-action@v1.1.1
+        if: ${{ !cancelled() }}
