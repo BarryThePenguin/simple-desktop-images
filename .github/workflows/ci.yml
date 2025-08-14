@@ -14,7 +14,6 @@ jobs:
           cache: npm
 
       - run: npm ci
-      - run: mkdir coverage
       - run: npm test
         env:
           NODE_V8_COVERAGE: coverage
