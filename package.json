@@ -11,7 +11,7 @@
   "author": "Jonathan Haines",
   "scripts": {
     "start": "node src/index.ts",
-    "test": "xo && node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=coverage/lcov.info",
+    "test": "xo && node --test --experimental-test-coverage --test-reporter=lcov --test-reporter-destination=./coverage/lcov.info",
     "test:watch": "node --test --watch"
   },
   "dependencies": {
