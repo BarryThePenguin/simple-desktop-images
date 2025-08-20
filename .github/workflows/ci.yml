@@ -17,6 +17,6 @@ jobs:
       - run: npm test
         env:
           NODE_V8_COVERAGE: coverage
-      - uses: codecov/codecov-action@v5.4.3
+      - uses: codecov/codecov-action@v5.5.0
       - uses: codecov/test-results-action@v1.1.1
         if: ${{ !cancelled() }}
