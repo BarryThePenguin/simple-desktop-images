@@ -29,7 +29,7 @@
     "prettier-plugin-package": "^2.0.0",
     "sinon": "^21.0.0",
     "typescript": "^5.9.3",
-    "xo": "^1.2.2"
+    "xo": "^1.2.3"
   },
   "xo": {
     "prettier": "compat"
