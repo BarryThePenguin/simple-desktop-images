@@ -4,39 +4,64 @@ import { FileDownload } from "./file-download.ts";
 
 type ClientOptions = {
 	agent: undici.Dispatcher;
-	dlDir: string;
 	origin: string;
 };
 
 export class Client {
 	http: undici.Dispatcher;
 
-	dlDir: string;
-
 	origin: string;
 
-	constructor({ agent, dlDir, origin }: ClientOptions) {
-		this.dlDir = dlDir;
+	constructor({ agent, origin }: ClientOptions) {
 		this.http = agent;
 		this.origin = origin;
 	}
 
-	async *start(query: string): AsyncIterable<FileDownload> {
-		// Get the home page
-		const $ = await this.fromPath("/");
-		// Load the home page and find the first image
-		let url = $(query).attr("href");
+	start(query: string): ReadableStream<FileDownload> {
+		let url: string | undefined;
+		const { origin } = this;
 
-		while (typeof url === "string") {
-			// eslint-disable-next-line no-await-in-loop
-			const { file, next } = await this.nextImage(url);
-			url = next;
+		return new ReadableStream({
+			start: async () => {
+				// Get the home page
+				const $ = await this.loadContent("/");
+				// Load the home page and find the first image
+				url = $(query).attr("href");
+			},
+			pull: async (controller) => {
+				if (url) {
+					const { path, next } = await this.nextImage(url);
 
-			yield file;
-		}
+					if (path) {
+						const file = new FileDownload(url, async () => {
+							const response = await this.http.request({
+								method: "GET",
+								origin,
+								path,
+							});
+
+							return response.body;
+						});
+						controller.enqueue(file);
+					}
+
+					url = next;
+				} else {
+					controller.close();
+				}
+			},
+		});
 	}
 
-	private async fromPath(path: string) {
+	download(dlDir: string): WritableStream<FileDownload> {
+		return new WritableStream({
+			async write(chunk) {
+				await chunk.download(dlDir);
+			},
+		});
+	}
+
+	private async loadContent(path: string) {
 		const response = await this.http.request({
 			method: "GET",
 			path,
@@ -51,19 +76,12 @@ export class Client {
 	 */
 	private async nextImage(
 		imageUrl: string,
-	): Promise<{ next: string | undefined; file: FileDownload }> {
-		const { dlDir, http, origin } = this;
-		const $ = await this.fromPath(imageUrl);
+	): Promise<{ next: string | undefined; path: string | undefined }> {
+		const $ = await this.loadContent(imageUrl);
 
 		const next = $("a.back").attr("href");
-		const path = $(".desktop > a").attr("href") ?? "";
+		const path = $(".desktop > a").attr("href");
 
-		return {
-			next,
-			file: new FileDownload(dlDir, imageUrl, async () => {
-				const response = await http.request({ method: "GET", path, origin });
-				return response.body;
-			}),
-		};
+		return { next, path };
 	}
 }

@@ -9,14 +9,12 @@ const dlDir = resolve("./images");
 const agent = new undici.Agent({ connections: 20 }).compose(
 	undici.interceptors.redirect({ maxRedirections: 5 }),
 );
-const client = new Client({ agent, dlDir, origin });
+const client = new Client({ agent, origin });
 
 try {
-	const images$ = client.start(".desktops > .edge > .desktop > a");
-
-	for await (const file of images$) {
-		void file.download();
-	}
+	await client
+		.start(".desktops > .edge > .desktop > a")
+		.pipeTo(client.download(dlDir));
 
 	console.log("Completed");
 } catch (error: unknown) {

@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import test, { after } from "node:test";
-import { deepEqual, ok } from "node:assert/strict";
+import { deepEqual } from "node:assert/strict";
 import { equal } from "node:assert";
 import * as undici from "undici";
 import { Client } from "../src/client.ts";
@@ -28,7 +28,7 @@ await test("no result", async () => {
 			headers: { "Content-Type": "text/html" },
 		});
 
-	const client = new Client({ agent, dlDir, origin });
+	const client = new Client({ agent, origin });
 
 	const images$ = client.start(".selector");
 
@@ -44,7 +44,7 @@ await test("empty body", async () => {
 		headers: { "Content-Type": "text/html" },
 	});
 
-	const client = new Client({ agent, dlDir, origin });
+	const client = new Client({ agent, origin });
 
 	const images$ = client.start(".selector");
 
@@ -60,7 +60,7 @@ await test("incorrect content-type", async () => {
 		headers: { "Content-Type": "text/not-html" },
 	});
 
-	const client = new Client({ agent, dlDir, origin });
+	const client = new Client({ agent, origin });
 
 	const images$ = client.start(".selector");
 
@@ -74,7 +74,7 @@ await test("no content-type", async () => {
 
 	agent.intercept({ path: "/" }).reply(200);
 
-	const client = new Client({ agent, dlDir, origin });
+	const client = new Client({ agent, origin });
 
 	const images$ = client.start(".selector");
 
@@ -129,19 +129,17 @@ await test("client constructor", async () => {
 			`,
 		);
 
-	const client = new Client({ agent, dlDir, origin });
+	const client = new Client({ agent, origin });
 
 	const images$ = client.start(".selector");
 
 	const [firstFile, secondFile] = await Array.fromAsync(images$);
 
-	equal(firstFile?.dlDir, dlDir);
 	equal(firstFile?.imagePath, "/browse/desktops/2017/jul/28/image-one");
-	equal(firstFile?.path, resolve("./fixtures/test/2017-07-28 image-one.png"));
+	equal(firstFile?.name, "2017-07-28 image-one.png");
 
-	equal(secondFile?.dlDir, dlDir);
 	equal(secondFile?.imagePath, "/browse/desktops/2016/feb/02/image-two");
-	equal(secondFile?.path, resolve("./fixtures/test/2016-02-02 image-two.png"));
+	equal(secondFile?.name, "2016-02-02 image-two.png");
 });
 
 await test("file exists", async () => {
@@ -182,15 +180,9 @@ await test("file exists", async () => {
 		})
 		.reply(200);
 
-	const client = new Client({ agent, dlDir, origin });
+	const client = new Client({ agent, origin });
 
-	const images$ = client.start(".selector");
-
-	const [firstFile] = await Array.fromAsync(images$);
-
-	ok(firstFile);
-
-	await firstFile.download();
+	await client.start(".selector").pipeTo(client.download(dlDir));
 });
 
 await test("directory does not exist", async () => {
@@ -231,17 +223,9 @@ await test("directory does not exist", async () => {
 		})
 		.reply(200);
 
-	const client = new Client({
-		agent,
-		dlDir: resolve("./fixture/does/not/exist"),
-		origin,
-	});
+	const client = new Client({ agent, origin });
 
-	const images$ = client.start(".selector");
-
-	const [firstFile] = await Array.fromAsync(images$);
-
-	ok(firstFile);
-
-	await firstFile.download();
+	await client
+		.start(".selector")
+		.pipeTo(client.download(resolve("./fixture/does/not/exist")));
 });

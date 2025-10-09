@@ -1,6 +1,5 @@
 import { join } from "node:path";
-import type { Readable } from "node:stream";
-import { pipeline } from "node:stream/promises";
+import { type Readable, pipeline } from "node:stream";
 import { createWriteStream } from "node:fs";
 
 const months = [
@@ -19,12 +18,12 @@ const months = [
 	"dec",
 ];
 
-export function parseMonth(month: string): string {
+function parseMonth(month: string): string {
 	const result = months.indexOf(month).toString();
 	return result.padStart(2, "0");
 }
 
-// Rename the image file
+/** Rename the image file */
 function renameFile(
 	year: string,
 	month: string,
@@ -35,8 +34,8 @@ function renameFile(
 	return decodeURIComponent(result).trim();
 }
 
-// Standardise image names
-export function imageName(dlDir: string, imagePath: string): string {
+/** Standardise image names */
+function imageName(imagePath: string): string {
 	const [year, month, day, ...rest] = imagePath
 		.replace("/browse/desktops/", "")
 		.split("/");
@@ -47,59 +46,45 @@ export function imageName(dlDir: string, imagePath: string): string {
 		day ?? "",
 		rest.join(" ").trim().replace(" ", "-"),
 	);
-	return join(dlDir, `${savePath}.png`);
+	return `${savePath}.png`;
 }
 
 export class FileDownload {
-	readonly #dlDir: string;
-
 	readonly #imagePath: string;
 
 	readonly #downloadFile: () => Promise<Readable>;
 
-	readonly #path: string;
-
-	get dlDir(): string {
-		return this.#dlDir;
+	get name() {
+		return imageName(this.#imagePath);
 	}
 
-	get imagePath(): string {
+	get imagePath() {
 		return this.#imagePath;
 	}
 
-	get path(): string {
-		return this.#path;
-	}
-
-	constructor(
-		dlDir: string,
-		imagePath: string,
-		downloadFile: () => Promise<Readable>,
-	) {
-		this.#dlDir = dlDir;
+	constructor(imagePath: string, downloadFile: () => Promise<Readable>) {
 		this.#imagePath = imagePath;
 		this.#downloadFile = downloadFile;
-
-		this.#path = imageName(dlDir, imagePath);
 	}
 
 	// Save the image to the file system
-	async download() {
-		try {
-			await pipeline(
-				await this.#downloadFile(),
-				createWriteStream(this.#path, {
-					flags: "wx",
-					mode: 0o644,
-					encoding: "utf8",
-				}),
-			);
-		} catch (error: unknown) {
-			if ((error as NodeJS.ErrnoException).code === "EEXIST") {
-				console.log("file already exists", this.#path);
-			} else {
-				console.error("download error", error);
-			}
-		}
+	async download(dlDir: string) {
+		const path = join(dlDir, this.name);
+
+		pipeline(
+			await this.#downloadFile(),
+			createWriteStream(path, {
+				flags: "wx",
+				mode: 0o644,
+				encoding: "utf8",
+			}),
+			(error) => {
+				if (error?.code === "EEXIST") {
+					console.log("file already exists", path);
+				} else if (error) {
+					console.error("download error", error);
+				}
+			},
+		);
 	}
 }
