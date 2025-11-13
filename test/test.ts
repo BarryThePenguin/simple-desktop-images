@@ -3,7 +3,7 @@ import test, { after } from "node:test";
 import { deepEqual } from "node:assert/strict";
 import { equal } from "node:assert";
 import * as undici from "undici";
-import { Client } from "../src/client.ts";
+import * as client from "../src/client.ts";
 
 const html = String.raw;
 
@@ -20,17 +20,15 @@ after(() => {
 });
 
 await test("no result", async () => {
-	const agent = mockAgent.get(origin);
+	const dispatcher = mockAgent.get(origin);
 
-	agent
+	dispatcher
 		.intercept({ path: "/" })
 		.reply(200, html`<a class="selector">link text</a>`, {
 			headers: { "Content-Type": "text/html" },
 		});
 
-	const client = new Client({ agent, origin });
-
-	const images$ = client.start(".selector");
+	const images$ = client.images(".selector", { dispatcher, origin });
 
 	const result = await Array.fromAsync(images$);
 
@@ -38,15 +36,13 @@ await test("no result", async () => {
 });
 
 await test("empty body", async () => {
-	const agent = mockAgent.get(origin);
+	const dispatcher = mockAgent.get(origin);
 
-	agent.intercept({ path: "/" }).reply(200, {
+	dispatcher.intercept({ path: "/" }).reply(200, {
 		headers: { "Content-Type": "text/html" },
 	});
 
-	const client = new Client({ agent, origin });
-
-	const images$ = client.start(".selector");
+	const images$ = client.images(".selector", { dispatcher, origin });
 
 	const result = await Array.fromAsync(images$);
 
@@ -54,15 +50,13 @@ await test("empty body", async () => {
 });
 
 await test("incorrect content-type", async () => {
-	const agent = mockAgent.get(origin);
+	const dispatcher = mockAgent.get(origin);
 
-	agent.intercept({ path: "/" }).reply(200, {
+	dispatcher.intercept({ path: "/" }).reply(200, {
 		headers: { "Content-Type": "text/not-html" },
 	});
 
-	const client = new Client({ agent, origin });
-
-	const images$ = client.start(".selector");
+	const images$ = client.images(".selector", { dispatcher, origin });
 
 	const result = await Array.fromAsync(images$);
 
@@ -70,13 +64,11 @@ await test("incorrect content-type", async () => {
 });
 
 await test("no content-type", async () => {
-	const agent = mockAgent.get(origin);
+	const dispatcher = mockAgent.get(origin);
 
-	agent.intercept({ path: "/" }).reply(200);
+	dispatcher.intercept({ path: "/" }).reply(200);
 
-	const client = new Client({ agent, origin });
-
-	const images$ = client.start(".selector");
+	const images$ = client.images(".selector", { dispatcher, origin });
 
 	const result = await Array.fromAsync(images$);
 
@@ -84,9 +76,9 @@ await test("no content-type", async () => {
 });
 
 await test("client constructor", async () => {
-	const agent = mockAgent.get(origin);
+	const dispatcher = mockAgent.get(origin);
 
-	agent
+	dispatcher
 		.intercept({ path: "/" })
 		.defaultReplyHeaders({ "Content-Type": "text/html" })
 		.reply(
@@ -98,7 +90,7 @@ await test("client constructor", async () => {
 			`,
 		);
 
-	agent
+	dispatcher
 		.intercept({
 			path: "/browse/desktops/2017/jul/28/image-one",
 		})
@@ -115,7 +107,7 @@ await test("client constructor", async () => {
 			`,
 		);
 
-	agent
+	dispatcher
 		.intercept({
 			path: "/browse/desktops/2016/feb/02/image-two",
 		})
@@ -129,23 +121,21 @@ await test("client constructor", async () => {
 			`,
 		);
 
-	const client = new Client({ agent, origin });
-
-	const images$ = client.start(".selector");
+	const images$ = client.images(".selector", { dispatcher, origin });
 
 	const [firstFile, secondFile] = await Array.fromAsync(images$);
 
-	equal(firstFile?.imagePath, "/browse/desktops/2017/jul/28/image-one");
+	equal(firstFile?.url, "/browse/desktops/2017/jul/28/image-one");
 	equal(firstFile?.name, "2017-07-28 image-one.png");
 
-	equal(secondFile?.imagePath, "/browse/desktops/2016/feb/02/image-two");
+	equal(secondFile?.url, "/browse/desktops/2016/feb/02/image-two");
 	equal(secondFile?.name, "2016-02-02 image-two.png");
 });
 
 await test("file exists", async () => {
-	const agent = mockAgent.get(origin);
+	const dispatcher = mockAgent.get(origin);
 
-	agent
+	dispatcher
 		.intercept({ path: "/" })
 		.defaultReplyHeaders({
 			"Content-Type": "text/html",
@@ -159,7 +149,7 @@ await test("file exists", async () => {
 			`,
 		);
 
-	agent
+	dispatcher
 		.intercept({ path: "/browse/desktops/2020/oct/24/poop" })
 		.defaultReplyHeaders({
 			"Content-Type": "text/html",
@@ -173,22 +163,22 @@ await test("file exists", async () => {
 			`,
 		);
 
-	agent
+	dispatcher
 		.intercept({ path: "/download/?desktop=poop" })
 		.defaultReplyHeaders({
 			"Content-Type": "text/html",
 		})
 		.reply(200);
 
-	const client = new Client({ agent, origin });
+	const images$ = client.images(".selector", { dispatcher, origin });
 
-	await client.start(".selector").pipeTo(client.download(dlDir));
+	await images$.pipeTo(client.download(dlDir));
 });
 
 await test("directory does not exist", async () => {
-	const agent = mockAgent.get(origin);
+	const dispatcher = mockAgent.get(origin);
 
-	agent
+	dispatcher
 		.intercept({ path: "/" })
 		.defaultReplyHeaders({
 			"Content-Type": "text/html",
@@ -202,7 +192,7 @@ await test("directory does not exist", async () => {
 			`,
 		);
 
-	agent
+	dispatcher
 		.intercept({ path: "/browse/desktops/2020/oct/24/poop" })
 		.defaultReplyHeaders({
 			"Content-Type": "text/html",
@@ -216,16 +206,14 @@ await test("directory does not exist", async () => {
 			`,
 		);
 
-	agent
+	dispatcher
 		.intercept({ path: "/download/?desktop=poop" })
 		.defaultReplyHeaders({
 			"Content-Type": "text/html",
 		})
 		.reply(200);
 
-	const client = new Client({ agent, origin });
+	const images$ = client.images(".selector", { dispatcher, origin });
 
-	await client
-		.start(".selector")
-		.pipeTo(client.download(resolve("./fixture/does/not/exist")));
+	await images$.pipeTo(client.download(resolve("./fixture/does/not/exist")));
 });
