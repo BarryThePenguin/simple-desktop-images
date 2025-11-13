@@ -3,51 +3,47 @@ import { pipeline } from "node:stream";
 import { createWriteStream } from "node:fs";
 import type { ReadableStreamController } from "node:stream/web";
 
-const months = [
-	"pad",
-	"jan",
-	"feb",
-	"mar",
-	"apr",
-	"may",
-	"jun",
-	"jul",
-	"aug",
-	"sep",
-	"oct",
-	"nov",
-	"dec",
-];
+const imageExtensionRegex = /\.(gif|jpg|jpeg|png|webp)$/i;
+const imagePathRegex = /(\d{4})\/(.+)\/(\d{2})\/([^/.]+)/i;
+const whitespaceRegex = /\s+/g;
 
-function parseMonth(month: string): string {
-	const result = months.indexOf(month).toString();
-	return result.padStart(2, "0");
+const months: Record<string, string> = {
+	jan: "01",
+	feb: "02",
+	mar: "03",
+	apr: "04",
+	may: "05",
+	jun: "06",
+	jul: "07",
+	aug: "08",
+	sep: "09",
+	oct: "10",
+	nov: "11",
+	dec: "12",
+};
+
+function parseImageName(imagePath: string) {
+	const match = imagePathRegex.exec(imagePath) ?? [];
+	const [, year, monthString, day, filename] = match;
+	const month = monthString ? months[monthString] : undefined;
+	let name;
+
+	if (year && month && day && filename) {
+		name = `${year}-${month}-${day.padStart(2, "0")} ${decodeURIComponent(
+			filename,
+		)
+			.trim()
+			.replaceAll(whitespaceRegex, "-")
+			.replaceAll(/-+/g, "-")}`;
+	}
+
+	return name;
 }
 
-/** Rename the image file */
-function renameFile(
-	year: string,
-	month: string,
-	day: string,
-	rest: string,
-): string {
-	const result = `${year}-${parseMonth(month)}-${day.padStart(2, "0")} ${rest}`;
-	return decodeURIComponent(result).trim();
-}
-
-/** Standardise image names */
-function imageName(imagePath: string): string {
-	const [year, month, day, ...rest] = imagePath
-		.replace("/browse/desktops/", "")
-		.split("/");
-
-	const savePath = renameFile(
-		year ?? "",
-		month ?? "",
-		day ?? "",
-		rest.join(" ").trim().replace(" ", "-"),
-	);
-	return `${savePath}.png`;
+function filePath(dir: string, file: File): string {
+	const extensionMatch = imageExtensionRegex.exec(file.name);
+	const [, extension] = extensionMatch ?? [];
+	return join(dir, `${file.name}.${extension ?? "png"}`);
 }
 
 type Chunk = {
@@ -63,16 +59,20 @@ export function enqueue(
 	controller: ReadableStreamController<Image>,
 	{ downloadFile, url }: Chunk,
 ): void {
-	const name = imageName(url);
-	controller.enqueue({ downloadFile, name, url });
+	const name = parseImageName(url);
+	if (name) {
+		controller.enqueue({ downloadFile, name, url });
+	} else {
+		controller.error(new Error(`Could not parse image name from URL: ${url}`));
+	}
 }
 
 /** Save the image to the file system */
-export function download(filePath: string): WritableStream<Image> {
+export function download(dlDir: string): WritableStream<Image> {
 	return new WritableStream({
 		async write({ downloadFile, name }) {
-			const path = join(filePath, name);
 			const file = await downloadFile(name);
+			const path = filePath(dlDir, file);
 
 			pipeline(
 				file.stream(),

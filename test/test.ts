@@ -1,6 +1,6 @@
 import { resolve } from "node:path";
 import test, { after } from "node:test";
-import { deepEqual } from "node:assert/strict";
+import { deepEqual, rejects } from "node:assert/strict";
 import { equal } from "node:assert";
 import * as undici from "undici";
 import * as client from "../src/client.ts";
@@ -19,7 +19,7 @@ after(() => {
 	mockAgent.assertNoPendingInterceptors();
 });
 
-await test("no result", async () => {
+void test("no result", async () => {
 	const dispatcher = mockAgent.get(origin);
 
 	dispatcher
@@ -35,7 +35,7 @@ await test("no result", async () => {
 	deepEqual(result, []);
 });
 
-await test("empty body", async () => {
+void test("empty body", async () => {
 	const dispatcher = mockAgent.get(origin);
 
 	dispatcher.intercept({ path: "/" }).reply(200, {
@@ -49,7 +49,7 @@ await test("empty body", async () => {
 	deepEqual(result, []);
 });
 
-await test("incorrect content-type", async () => {
+void test("incorrect content-type", async () => {
 	const dispatcher = mockAgent.get(origin);
 
 	dispatcher.intercept({ path: "/" }).reply(200, {
@@ -63,7 +63,7 @@ await test("incorrect content-type", async () => {
 	deepEqual(result, []);
 });
 
-await test("no content-type", async () => {
+void test("no content-type", async () => {
 	const dispatcher = mockAgent.get(origin);
 
 	dispatcher.intercept({ path: "/" }).reply(200);
@@ -75,7 +75,7 @@ await test("no content-type", async () => {
 	deepEqual(result, []);
 });
 
-await test("client constructor", async () => {
+void test("client constructor", async () => {
 	const dispatcher = mockAgent.get(origin);
 
 	dispatcher
@@ -126,13 +126,13 @@ await test("client constructor", async () => {
 	const [firstFile, secondFile] = await Array.fromAsync(images$);
 
 	equal(firstFile?.url, "/browse/desktops/2017/jul/28/image-one");
-	equal(firstFile?.name, "2017-07-28 image-one.png");
+	equal(firstFile?.name, "2017-07-28 image-one");
 
 	equal(secondFile?.url, "/browse/desktops/2016/feb/02/image-two");
-	equal(secondFile?.name, "2016-02-02 image-two.png");
+	equal(secondFile?.name, "2016-02-02 image-two");
 });
 
-await test("file exists", async () => {
+void test("file exists", async () => {
 	const dispatcher = mockAgent.get(origin);
 
 	dispatcher
@@ -175,7 +175,7 @@ await test("file exists", async () => {
 	await images$.pipeTo(client.download(dlDir));
 });
 
-await test("directory does not exist", async () => {
+void test("directory does not exist", async () => {
 	const dispatcher = mockAgent.get(origin);
 
 	dispatcher
@@ -216,4 +216,44 @@ await test("directory does not exist", async () => {
 	const images$ = client.images(".selector", { dispatcher, origin });
 
 	await images$.pipeTo(client.download(resolve("./fixture/does/not/exist")));
+});
+
+void test("invalid image URL", async () => {
+	const dispatcher = mockAgent.get(origin);
+
+	dispatcher
+		.intercept({ path: "/" })
+		.defaultReplyHeaders({ "Content-Type": "text/html" })
+		.reply(
+			200,
+			html`
+				<a class="selector" href="/browse/desktops/123/lol/28/image-one">
+					link text
+				</a>
+			`,
+		);
+
+	dispatcher
+		.intercept({
+			path: "/browse/desktops/123/lol/28/image-one",
+		})
+		.defaultReplyHeaders({ "Content-Type": "text/html" })
+		.reply(
+			200,
+			html`
+				<a class="back" href="/browse/desktops/2016/feb/02/image-two">
+					link text
+				</a>
+				<div class="desktop">
+					<a href="/download/?desktop=1234">link text</a>
+				</div>
+			`,
+		);
+
+	const images$ = client.images(".selector", { dispatcher, origin });
+
+	await rejects(async () => Array.fromAsync(images$), {
+		message:
+			"Could not parse image name from URL: /browse/desktops/123/lol/28/image-one",
+	});
 });
