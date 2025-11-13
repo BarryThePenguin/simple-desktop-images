@@ -20,7 +20,7 @@
   },
   "devDependencies": {
     "@tsconfig/node-ts": "^23.6.2",
-    "@tsconfig/node24": "^24.0.1",
+    "@tsconfig/node24": "^24.0.2",
     "@tsconfig/strictest": "^2.0.8",
     "@types/node": "^24.10.0",
     "prettier": "^3.6.2",
