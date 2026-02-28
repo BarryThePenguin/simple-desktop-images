@@ -15,7 +15,7 @@
     "test:watch": "node --test --watch"
   },
   "dependencies": {
-    "cheerio": "^1.1.2",
+    "cheerio": "^1.2.0",
     "undici": "^7.19.0"
   },
   "devDependencies": {
