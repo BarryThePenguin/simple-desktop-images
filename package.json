@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "cheerio": "^1.2.0",
-    "undici": "^7.19.0"
+    "undici": "^7.24.1"
   },
   "devDependencies": {
     "@tsconfig/node-ts": "^23.6.4",
