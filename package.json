@@ -26,7 +26,7 @@
     "prettier": "^3.8.1",
     "prettier-plugin-package": "^2.0.0",
     "typescript": "^5.9.3",
-    "xo": "^1.2.3"
+    "xo": "^2.0.2"
   },
   "xo": {
     "prettier": "compat"
